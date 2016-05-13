@@ -10,13 +10,8 @@ function DataCollectionService(coinTicker, databaseConnectionString, twitterConn
     this.priceService = new PriceService();
     this.sentimentService = new SentimentService();
     this.analysisService = new AnalysisService();
-    this.ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
-    this.twitterClient = new Twitter({
-        consumer_key: process.env.TWITTER_CONSUMER_KEY,
-        consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-        access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-        access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
-    });
+    this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
+    this.twitterClient = new Twitter(twitterConnectionInfo);
     this.coinTicker = coinTicker;
     this.prices = [];
     this.tweets = [];
