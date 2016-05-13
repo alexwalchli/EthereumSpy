@@ -1,0 +1,14 @@
+{
+  "name": "ethereumspy",
+  "version": "1.0.0",
+  "description": "Cryptocurrency price movement prediction",
+  "main": "app.js",
+  "scripts": {
+    "test": "tests"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}

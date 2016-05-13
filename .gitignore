@@ -1,0 +1,5 @@
+# Visual studio code
+.vscode
+
+# Dependency directories
+node_modules
