@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var express = require('express');
 var exphbs  = require('express-handlebars');
 var app = express();
@@ -16,13 +17,15 @@ var bitcoinDataCollectionService = new DataCollectionService('BTC', process.env.
 bitcoinDataCollectionService.startDataCollection();
 var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
-if(process.env.CLEAR_DB_ON_START){
+if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
     //ethereumSpyDb.clearDatabase();
 }
 
 app.get('/', function(req, res) {
     ethereumSpyDb.getPriceMovementPredictionResults(function(results){
-        res.render('home', { results: results });
+        var modelAccuracy = _.filter(results, { predictedCorrectly: true }).length / results.length;
+        
+        res.render('home', { modelAccuracy: modelAccuracy, results: results });
     });
 });
 

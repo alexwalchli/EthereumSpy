@@ -1,6 +1,23 @@
 <h1>Ethereum Spy</h1>
-<ul>
-{{#each results}}
-    <li>{{this.predictedCorrectly}}</li>
-{{/each}}
-</ul>
+<p><strong>BTC Model Accuracy: {{modelAccuracy}}%</strong></p>
+<p><strong>BTC Results</strong></p>
+<table>
+    <thead>
+        <tr>
+            <th>Predicted Correctly?</th>
+            <th>Sentiment</th>
+            <th>Number of Tweets</th>
+            <th>Price Movement</th>
+        </tr>    
+    </thead>  
+    <tbody>
+        {{#each results}}
+            <tr>
+                <td>{{this.predictedCorrectly}}</td>
+                <td>{{this.sentimentScore}}</td>
+                <td>{{this.numberOfTweets}}</td>
+                <td>{{this.priceMovement}}</td>
+            </tr>
+        {{/each}}
+    </tbody>  
+</table>

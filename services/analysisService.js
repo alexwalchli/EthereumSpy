@@ -21,25 +21,37 @@ AnalysisService.prototype.classifyTweetsVsPriceChange = function(coinTicker, pri
     var startingPrice = prices[0];
     var endingPrice = prices[prices.length - 1];
     var priceChange = endingPrice.price - startingPrice.price;
-    var priceIncreased = priceChange > 0 ? 'positive' : 'negative';
+    var priceMovement = priceChange > 0 ? 'positive' : 'negative';
     
     this.ethereumSpyDb.getPriceMovementPredictionModel(function(predictionModel){
         var textClassifier = predictionModel ? bayes.fromJson(predictionModel.textClassifierJson)
                                              : bayes();
         
-        var lastHourOfTweetsCorpus = _.reduce(tweets, function(corpus, tweet){
+        var todaysTweetCorpus = _.reduce(tweets, function(corpus, tweet){
             return corpus + ' ' + tweet.text;
         }, '');
+        var overallSentimentScore = _.reduce(tweets, function(sum, tweet){
+            return sum + tweet.sentimentScore;
+        }, 0);
         
         // back test against yesterday's prediction model
-        var testResult = textClassifier.categorize(lastHourOfTweetsCorpus);
-        var modelPredictedCorrectly = testResult == priceIncreased;
-        if(!modelPredictedCorrectly){
-            console.log('Price movement prediction model categorized incorrectly');
+        var testResult = textClassifier.categorize(todaysTweetCorpus);
+        var modelPredictedCorrectly = testResult == priceMovement;
+        if(modelPredictedCorrectly){
+            console.log('Price movement prediction model categorized correctly');
+        } else {
+           console.log('Price movement prediction model categorized incorrectly'); 
         }
-        this.ethereumSpyDb.addPriceMovementPredictionResult({ timestamp: Date.now(), predictedCorrectly: modelPredictedCorrectly });
         
-        textClassifier.learn(lastHourOfTweetsCorpus, priceChange);
+        this.ethereumSpyDb.addPriceMovementPredictionResult({ 
+            timestamp: Date.now(),
+            predictedCorrectly: modelPredictedCorrectly,
+            numberOfTweets: tweets.length,
+            priceMovement: priceMovement,
+            sentimentScore: overallSentimentScore
+        });
+        
+        textClassifier.learn(todaysTweetCorpus, priceChange);
         this.ethereumSpyDb.updatePriceMovementPredictionModel(textClassifier.toJson(), function(){
             console.log('Price movement prediction model updated');
         });
@@ -58,9 +70,9 @@ AnalysisService.prototype.analyze = function(prices, tweets, type){
     var startingPrice = prices[0];
     var endingPrice = prices[prices.length - 1];
     var priceChange = endingPrice.price - startingPrice.price;
-    var priceIncreased = priceChange > 0 ? 'positive' : 'negative';
+    var priceMovement = priceChange > 0 ? 'positive' : 'negative';
     
-    console.log('Price Increase? ' + priceIncreased);
+    console.log('Price Increase? ' + priceMovement);
     
     var sentimentOrderedTweets = _.sortBy(tweets, function(tweet){
         return tweet.sentimentScore;
@@ -68,7 +80,7 @@ AnalysisService.prototype.analyze = function(prices, tweets, type){
     
     var mostCriticalTweet = sentimentOrderedTweets[0];
     var mostPositiveTweet = sentimentOrderedTweets[sentimentOrderedTweets.length - 1];
-    var lastHourOfTweetsCorpus = _.reduce(tweets, function(corpus, tweet){
+    var todaysTweetCorpus = _.reduce(tweets, function(corpus, tweet){
         return corpus + ' ' + tweet.text;
     }, '');
     var overallSentimentScore = _.reduce(tweets, function(sum, tweet){
@@ -84,13 +96,13 @@ AnalysisService.prototype.analyze = function(prices, tweets, type){
         }
         
         // test prediction model
-        var testResult = textClassifier.categorize(lastHourOfTweetsCorpus);
-        var modelPredictedCorrectly = testResult == priceIncreased;
+        var testResult = textClassifier.categorize(todaysTweetCorpus);
+        var modelPredictedCorrectly = testResult == priceMovement;
         if(!modelPredictedCorrectly){
             console.log('Classification model categorized incorrectly');
         }
         
-        textClassifier.learn(lastHourOfTweetsCorpus, priceChange);
+        textClassifier.learn(todaysTweetCorpus, priceChange);
     
         var analysis = {
             overallSentimentScore: overallSentimentScore,
