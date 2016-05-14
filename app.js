@@ -1,5 +1,8 @@
 var express = require('express');
+var exphbs  = require('express-handlebars');
 var app = express();
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
 
 var DataCollectionService = require('./services/dataCollectionService');
 var EthereumSpyDb = require('./ethereumSpyDb');
@@ -13,9 +16,13 @@ var bitcoinDataCollectionService = new DataCollectionService('BTC', process.env.
 bitcoinDataCollectionService.startDataCollection();
 var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
+if(process.env.CLEAR_DB_ON_START){
+    //ethereumSpyDb.clearDatabase();
+}
+
 app.get('/', function(req, res) {
-    ethereumSpyDb.getAnalysisResults(function(results){
-        res.send(results);
+    ethereumSpyDb.getPriceMovementPredictionResults(function(results){
+        res.render('home', { results: results });
     });
 });
 

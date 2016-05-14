@@ -10,8 +10,8 @@ AnalysisService.prototype.analyzeSentiment = function(prices, tweets){
     // TODO:
 };
 
-AnalysisService.prototype.classifyTweetsVsPriceChange = function(prices, tweets){
-    console.log('Running price movement classification on ' + tweets.length + ' tweets and ' + prices.length + ' prices');
+AnalysisService.prototype.classifyTweetsVsPriceChange = function(coinTicker, prices, tweets){
+    console.log('Running price movement classification on ' + coinTicker + ' with ' + tweets.length + ' tweets and ' + prices.length + ' prices');
     if(!tweets || tweets.length === 0 || !prices || prices.length === 0){
         console.log('Skipping analysis, no Tweets or Prices');
         return;

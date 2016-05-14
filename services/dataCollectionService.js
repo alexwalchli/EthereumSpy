@@ -64,7 +64,7 @@ function retrieveCoinPrice(){
 }
 
 function executeTweetVsPriceClassification(){
-    this.analysisService.classifyTweetsVsPriceChange(this.prices, this.tweets);
+    this.analysisService.classifyTweetsVsPriceChange(this.coinTicker, this.prices, this.tweets);
     this.tweets = [];
     this.prices = [];
 }

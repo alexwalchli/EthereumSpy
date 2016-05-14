@@ -1,4 +1,5 @@
 var mongojs = require('mongojs');
+var _ = require('lodash');
 
 function EthereumSpyDb(connectionString){
     var mongojs = require('mongojs');
@@ -62,6 +63,28 @@ EthereumSpyDb.prototype.updatePriceMovementPredictionModel = function(textClassi
 
 EthereumSpyDb.prototype.addPriceMovementPredictionResult = function(result){
     this.db.priceMovementPredictionResults.insert(result);
+};
+
+EthereumSpyDb.prototype.getPriceMovementPredictionResults = function(callback, ctx){
+    this.db.priceMovementPredictionResults.find(function (err, results) {
+        if(err){
+            console.log('Error querying database: ' + err);
+        } else {
+            return callback.call(ctx, results);
+        }
+    });
+};
+
+EthereumSpyDb.prototype.clearDatabase = function(){
+    console.log('Clearing database...');
+    this.db.getCollectionNames(function(err, colNames) {
+        _.forEach(colNames, function(collection_name){
+            if (collection_name.indexOf("system.") == -1){
+                this.db[collection_name].drop();
+                console.log('Cleared ' + collection_name + ' collection');
+            }
+        }.bind(this));
+    }.bind(this));
 };
 
 module.exports = EthereumSpyDb;
