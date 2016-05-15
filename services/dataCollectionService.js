@@ -21,7 +21,7 @@ class DataCollectionService{
     }
     
     scheduleDataCollection(){
-        nodeSchedule.scheduleJob('1 * * * * *', _classifyDataAgainstPriceMovement); // for debugging
+        nodeSchedule.scheduleJob('1 * * * * *', this._classifyDataAgainstPriceMovement.bind(this)); // for debugging
     
         nodeSchedule.scheduleJob('15 * * * * *', this._retrieveCoinPrice.bind(this));
         nodeSchedule.scheduleJob('45 * * * * *', this._retrieveCoinPrice.bind(this));
