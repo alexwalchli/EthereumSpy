@@ -4,6 +4,7 @@
 <table>
     <thead>
         <tr>
+            <th>Timestamp</th>
             <th>Predicted Correctly?</th>
             <th>Sentiment</th>
             <th>Number of Tweets</th>
@@ -13,6 +14,7 @@
     <tbody>
         {{#each results}}
             <tr>
+                <td>{{this.timestamp}}</td>
                 <td>{{this.predictedCorrectly}}</td>
                 <td>{{this.sentimentScore}}</td>
                 <td>{{this.numberOfTweets}}</td>
