@@ -10,7 +10,7 @@ class DataCollectionService{
     constructor(coinTicker, databaseConnectionString, twitterConnectionInfo){
         this.priceService = new PriceService();
         this.sentimentService = new SentimentService();
-        this.analysisService = new AnalysisService();
+        this.analysisService = new AnalysisService(databaseConnectionString);
         this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
         this.twitterClient = new Twitter(twitterConnectionInfo);
         this.coinTicker = coinTicker;
@@ -67,7 +67,7 @@ class DataCollectionService{
     }
     
     _classifyDataAgainstPriceMovement(){
-        this.analysisService.classifyTweetsVsPriceChange(this.coinTicker, this.prices, this.tweets);
+        this.analysisService.classifyTweetsAgainstPriceMovement(this.coinTicker, this.prices, this.tweets);
         this.tweets = [];
         this.prices = [];
     }
