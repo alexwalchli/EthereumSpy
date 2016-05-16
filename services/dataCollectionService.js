@@ -21,11 +21,19 @@ class DataCollectionService{
     }
     
     scheduleDataCollection(){
-        nodeSchedule.scheduleJob('1 * * * * *', this._classifyDataAgainstPriceMovement.bind(this)); // for debugging
+        nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(); }); // for debugging
     
-        nodeSchedule.scheduleJob('15 * * * * *', this._retrieveCoinPrice.bind(this));
-        nodeSchedule.scheduleJob('45 * * * * *', this._retrieveCoinPrice.bind(this));
-        nodeSchedule.scheduleJob('0 0,6,12,18 * * *', this._classifyDataAgainstPriceMovement.bind(this));
+        nodeSchedule.scheduleJob('15 * * * * *', () => { this._retrieveCoinPrice(); });
+        nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrice(); });
+        
+        // every 6 hours
+        nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement(); });
+        
+        // every 12 hours
+        nodeSchedule.scheduleJob('0 11,23 * * *', () => { this._classifyDataAgainstPriceMovement(); });
+        
+        // every day
+        nodeSchedule.scheduleJob('0 23 * * *', () => { this._classifyDataAgainstPriceMovement(true); });
         
         this._startTwitterStream();
         
@@ -33,11 +41,12 @@ class DataCollectionService{
     }
     
     _startTwitterStream(){
-        this.twitterClient.stream('statuses/filter', {track: 'bitcoin'},  function(stream){
-            console.log('Streaming Twitter...');
-            stream.on('data', this._onNewTweet.bind(this));
-            stream.on('error', this._onTwitterError.bind(this));
-        }.bind(this));
+        this.twitterClient.stream('statuses/filter', {track: 'bitcoin'}, 
+            (stream) => {
+                console.log('Streaming Twitter...');
+                stream.on('data', this._onNewTweet.bind(this));
+                stream.on('error', this._onTwitterError.bind(this));
+            });
     }
     
     _onNewTweet(tweet){
@@ -57,16 +66,21 @@ class DataCollectionService{
     
     _retrieveCoinPrice(){
         console.log('Retrieving price for ' + this.coinTicker);
-        this.priceService.getPrice(this.coinTicker, function(resp){
-            this.prices.push({
-                price: resp.price,
-                timestamp: resp.timestamp,
-                volume: resp.volume
+        this.priceService.getPrice(this.coinTicker, 
+            (resp) => { 
+                this.prices.push({
+                    price: resp.price,
+                    timestamp: resp.timestamp,
+                    volume: resp.volume
+                });
             });
-        }.bind(this));
     }
     
-    _classifyDataAgainstPriceMovement(){
+    _classifyDataAgainstPriceMovement(clearDataCache){
+        if(clearDataCache){
+            
+        }
+        
         this.analysisService.classifyTweetsAgainstPriceMovement(this.coinTicker, this.prices, this.tweets);
         this.tweets = [];
         this.prices = [];
