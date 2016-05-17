@@ -67,6 +67,7 @@ class EthereumSpyDb{
     }
     
     clearAnalyzedTweetCache(){
+        console.log('Clearing Analyzed Tweet Cache');
         this.db.analyzedTweetCache.drop();
     }
     

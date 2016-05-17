@@ -24,7 +24,7 @@ class DataCollectionService{
     }
     
     scheduleDataCollection(){
-        nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-debugging'); }); // for debugging
+        //nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-debugging'); }); // for debugging
 
         // every 45 seconds
         nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrice(); });
