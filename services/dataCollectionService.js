@@ -1,10 +1,10 @@
-var Twitter = require('twitter');
-var _ = require('lodash');
-var PriceService = require('./priceService');
-var SentimentService = require('./sentimentService');
-var AnalysisService = require('./analysisService');
-var EthereumSpyDb = require('../ethereumSpyDb');
-var nodeSchedule = require('node-schedule');
+// var Twitter = require('twitter');
+// var _ = require('lodash');
+// var PriceService = require('./priceService');
+// var SentimentService = require('./sentimentService');
+// var AnalysisService = require('./analysisService');
+// var EthereumSpyDb = require('../ethereumSpyDb');
+// var nodeSchedule = require('node-schedule');
 
 // class DataCollectionService{
 //     constructor(coinTicker, databaseConnectionString, twitterConnectionInfo){
