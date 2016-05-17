@@ -1,7 +1,7 @@
 var request = require('request');
 
-function PriceService(){
-    function getPrice(coinTicker, callback){
+class PriceService{
+    getPrice(coinTicker, callback){
         request('https://www.cryptonator.com/api/ticker/' + coinTicker + '-usd', (error, response, body) => {
             if (!error && response.statusCode == 200) {
                 console.log(body);
