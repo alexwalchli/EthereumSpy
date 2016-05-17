@@ -1,5 +1,5 @@
-// var Twitter = require('twitter');
-// var _ = require('lodash');
+var Twitter = require('twitter');
+var _ = require('lodash');
 // var PriceService = require('./priceService');
 // var SentimentService = require('./sentimentService');
 // var AnalysisService = require('./analysisService');
