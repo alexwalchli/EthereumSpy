@@ -7,19 +7,21 @@ class AnalysisService{
         this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
     }
     
-    classifyTweetsAgainstPriceMovement(coinTicker, prices, tweets){
-        console.log('Running price movement classification on ' + coinTicker + ' with ' + tweets.length + ' tweets and ' + prices.length + ' prices');
+    classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, tweets){
+        console.log('Running ' + modelName + ' classification');
         if(!tweets || tweets.length === 0 || !prices || prices.length === 0){
             console.log('Skipping analysis, no Tweets or Prices');
             return;
         }
+        console.log('Details: ' + coinTicker + ' with ' + tweets.length + ' tweets and ' + prices.length + ' prices');
         
         var startingPrice = prices[0];
         var endingPrice = prices[prices.length - 1];
         var priceChange = endingPrice.price - startingPrice.price;
         var priceMovement = priceChange > 0 ? 'positive' : 'negative';
-        
-        this.ethereumSpyDb.getPriceMovementPredictionModel(function(predictionModel){
+        var self = this;
+       
+        this.ethereumSpyDb.getPriceMovementPredictionModel(modelName, (predictionModel) => {
             var textClassifier = predictionModel ? bayes.fromJson(predictionModel.textClassifierJson)
                                                 : bayes();
             var sentimentOrderedTweets = _.sortBy(tweets, function(tweet){
@@ -43,16 +45,19 @@ class AnalysisService{
                 console.log('Price movement prediction model categorized incorrectly'); 
             }
             
-            this.ethereumSpyDb.addPriceMovementPredictionResult({ 
+            self.ethereumSpyDb.addPriceMovementPredictionResult({ 
+                modelName: modelName,
+                coinTicker: coinTicker,
                 timestamp: Date.now(),
                 predictedCorrectly: modelPredictedCorrectly,
                 numberOfTweets: tweets.length,
                 priceMovement: priceMovement,
+                priceChange: priceChange,
                 sentimentScore: overallSentimentScore
             });
             
             textClassifier.learn(todaysTweetCorpus, priceChange);
-            this.ethereumSpyDb.updatePriceMovementPredictionModel(textClassifier.toJson(), function(){
+            self.ethereumSpyDb.updatePriceMovementPredictionModel(modelName, textClassifier.toJson(), () => {
                 console.log('Price movement prediction model updated');
             });
         }, this);   

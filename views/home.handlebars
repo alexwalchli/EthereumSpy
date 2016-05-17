@@ -1,25 +1,38 @@
-<h1>Ethereum Spy</h1>
-<p><strong>BTC Model Accuracy: {{modelAccuracy}}%</strong></p>
-<p><strong>BTC Results</strong></p>
-<table>
-    <thead>
-        <tr>
-            <th>Timestamp</th>
-            <th>Predicted Correctly?</th>
-            <th>Sentiment</th>
-            <th>Number of Tweets</th>
-            <th>Price Movement</th>
-        </tr>    
-    </thead>  
-    <tbody>
-        {{#each results}}
-            <tr>
-                <td>{{this.timestamp}}</td>
-                <td>{{this.predictedCorrectly}}</td>
-                <td>{{this.sentimentScore}}</td>
-                <td>{{this.numberOfTweets}}</td>
-                <td>{{this.priceMovement}}</td>
-            </tr>
-        {{/each}}
-    </tbody>  
-</table>
+
+<div class="row">
+    <div class="columns large-12">
+        <h1>Ethereum Spy</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="columns large-12">
+        <p><strong>BTC Model Accuracy: {{modelAccuracy}}%</strong></p>
+        <p><strong>BTC Results</strong></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Coin</th>
+                    <th>Timestamp</th>
+                    <th>Predicted Correctly?</th>
+                    <th>Sentiment</th>
+                    <th>Number of Tweets</th>
+                    <th>Price Movement</th>
+                </tr>    
+            </thead>  
+            <tbody>
+                {{#each results}}
+                    <tr>
+                        <td>{{this.modelName}}</td>
+                        <td>{{this.coinTicker}}</td>
+                        <td>{{this.timestamp}}</td>
+                        <td>{{this.predictedCorrectly}}</td>
+                        <td>{{this.sentimentScore}}</td>
+                        <td>{{this.numberOfTweets}}</td>
+                        <td>{{this.priceMovement}}({{this.priceChange}})</td>
+                    </tr>
+                {{/each}}
+            </tbody>  
+        </table>
+    </div>    
+</div>

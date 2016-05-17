@@ -4,7 +4,12 @@ var _ = require('lodash');
 class EthereumSpyDb{
     constructor(connectionString){
         var mongojs = require('mongojs');
-        this.db = mongojs(connectionString, ['analysisResults', 'priceMovementPredictionModel', 'priceMovementPredictionResults']);
+        this.db = mongojs(connectionString, 
+            ['analysisResults', 
+             'priceMovementPredictionModel',
+             'priceMovementPredictionResults',
+             'analyzedTweetCache',
+             'priceCache']);
         this.db.on('error', function (err) {
             console.log('database error', err);
         });
@@ -14,151 +19,90 @@ class EthereumSpyDb{
         });
     }
     
-    getAnalysisResults(callback, ctx){
-        this.db.analysisResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback, callbackCtx); });
+    getAnalysisResults(callback){
+        this.db.analysisResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
-    saveAnalysisResults(callback, ctx){
-        this.db.analysisResults.save(saveAnalysisResults, (error, resp) => { this._handleDatabaseResponse(error, resp, callback, callbackCtx); });
+    saveAnalysisResults(saveAnalysisResults, callback){
+        this.db.analysisResults.save(saveAnalysisResults, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
-    getPriceMovementPredictionModel(callback, ctx){
-        this.db.priceMovementPredictionModel.findOne((error, resp) => { this._handleDatabaseResponse(error, resp, callback, callbackCtx); });
+    getPriceMovementPredictionModel(modelName, callback){
+        this.db.priceMovementPredictionModel.findOne({ modelName: modelName }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
-    updatePriceMovementPredictionModel(textClassifierJson, callback, ctx){
+    updatePriceMovementPredictionModel(modelName, textClassifierJson, callback){
         var priceMovementPredictionModel = {
-        textClassifierJson: textClassifierJson  
+            modelName: modelName,
+            textClassifierJson: textClassifierJson  
         };
-        this.db.priceMovementPredictionModel.findOne(function(model){
+        this.db.priceMovementPredictionModel.findOne({ modelName: modelName }, (model) => {
             if(model){
                 priceMovementPredictionModel._id = model._id;
             }
-            this.db.analysisResults.save(priceMovementPredictionModel, function (err) {
-                if(err){
-                    console.log('Error querying database: ' + err);
-                } else {
-                    return callback.call(ctx);
-                }
-            });
-        }.bind(this));
+            this.db.analysisResults.save(priceMovementPredictionModel, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+        });
     }
     
     addPriceMovementPredictionResult(result){
         this.db.priceMovementPredictionResults.insert(result);
     }
     
-    getPriceMovementPredictionResults(callback, callbackCtx){
-        this.db.priceMovementPredictionResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback, callbackCtx); });
+    getPriceMovementPredictionResults(callback){
+        this.db.priceMovementPredictionResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+    }
+    
+    cacheAnalyzedTweets(analyzedTweets, callback){
+        var bulk = this.db.analyzedTweetCache.initializeUnorderedBulkOp();
+        analyzedTweets.forEach((analyzedTweet) => { bulk.insert(analyzedTweet); });
+        bulk.execute((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+    }
+    
+    cacheAnalyzedTweet(analyzedTweet, callback){
+        this.db.analyzedTweetCache.insert(analyzedTweet);
+    }
+    
+    getAnalyzedTweetsFromCache(callback){
+        this.db.analyzedTweetCache.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback ); });
+    }
+    
+    clearAnalyzedTweetCache(){
+        this.db.analyzedTweetCache.drop();
+    }
+    
+    getPrices(coinTicker, callback){
+        this.db.priceCache.find({ coinTicker: coinTicker}, (error, prices) => { this._handleDatabaseResponse(error, prices, callback); });
+    }
+    
+    cachePrice(price){
+        this.db.priceCache.insert(price);
+    }
+    
+    clearPriceCache(coinTicker){
+        console.log('Clearing Price Cache');
+        this.db.remove({ coinTicker: coinTicker }, false);
     }
     
     clearDatabase(){
         console.log('Clearing database...');
-        this.db.getCollectionNames(function(err, colNames) {
-            _.forEach(colNames, function(collection_name){
+        this.db.getCollectionNames((err, colNames) => {
+            _.forEach(colNames, (collection_name) => {
                 if (collection_name.indexOf("system.") == -1){
                     this.db[collection_name].drop();
                     console.log('Cleared ' + collection_name + ' collection');
                 }
-            }.bind(this));
-        }.bind(this));
+            });
+        });
     }
     
-    _handleDatabaseResponse(error, resp, callback, callbackCtx){
+    _handleDatabaseResponse(error, resp, callback){
         if(error){
             console.log('Error querying database: ' + error);
         } else if(callback) {
-            return callback.call(callbackCtx, resp);
+            return callback(resp);
         }
     }
 }
-
-
-// function EthereumSpyDb(connectionString){
-//     var mongojs = require('mongojs');
-//     this.db = mongojs(connectionString, ['analysisResults', 'priceMovementPredictionModel', 'priceMovementPredictionResults']);
-//     this.db.on('error', function (err) {
-//         console.log('database error', err);
-//     });
-
-//     this.db.on('connect', function () {
-//         console.log('database connected');
-//     });
-// }
-
-// EthereumSpyDb.prototype.getAnalysisResults = function(callback, ctx){
-//     this.db.analysisResults.find(function (err, analysisResults) {
-//         if(err){
-//             console.log('Error querying database: ' + err);
-//         } else {
-//             return callback.call(ctx, analysisResults);
-//         }
-//     });
-// };
-
-// EthereumSpyDb.prototype.saveAnalysisResults = function(saveAnalysisResults, callback, ctx){
-//     this.db.analysisResults.save(saveAnalysisResults, function (err) {
-//         if(err){
-//             console.log('Error querying database: ' + err);
-//         } else {
-//             return callback.call(ctx, saveAnalysisResults);
-//         }
-//     });
-// };
-
-// EthereumSpyDb.prototype.getPriceMovementPredictionModel = function(callback, ctx){
-//     this.db.priceMovementPredictionModel.findOne(function (err, pricePredictionModel) {
-//         if(err){
-//             console.log('Error querying database: ' + err);
-//         } else {
-//             return callback.call(ctx, pricePredictionModel);
-//         }
-//     });
-// };
-
-// EthereumSpyDb.prototype.updatePriceMovementPredictionModel = function(textClassifierJson, callback, ctx){
-//     var priceMovementPredictionModel = {
-//       textClassifierJson: textClassifierJson  
-//     };
-//     this.db.priceMovementPredictionModel.findOne(function(model){
-//         if(model){
-//             priceMovementPredictionModel._id = model._id;
-//         }
-//         this.db.analysisResults.save(priceMovementPredictionModel, function (err) {
-//             if(err){
-//                 console.log('Error querying database: ' + err);
-//             } else {
-//                 return callback.call(ctx);
-//             }
-//         });
-//     }.bind(this));
-// };
-
-// EthereumSpyDb.prototype.addPriceMovementPredictionResult = function(result){
-//     this.db.priceMovementPredictionResults.insert(result);
-// };
-
-// EthereumSpyDb.prototype.getPriceMovementPredictionResults = function(callback, ctx){
-//     this.db.priceMovementPredictionResults.find(function (err, results) {
-//         if(err){
-//             console.log('Error querying database: ' + err);
-//         } else {
-//             return callback.call(ctx, results);
-//         }
-//     });
-// };
-
-// EthereumSpyDb.prototype.clearDatabase = function(){
-//     console.log('Clearing database...');
-//     this.db.getCollectionNames(function(err, colNames) {
-//         _.forEach(colNames, function(collection_name){
-//             if (collection_name.indexOf("system.") == -1){
-//                 this.db[collection_name].drop();
-//                 console.log('Cleared ' + collection_name + ' collection');
-//             }
-//         }.bind(this));
-//     }.bind(this));
-// };
 
 module.exports = EthereumSpyDb;
 
