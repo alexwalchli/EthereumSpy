@@ -8,7 +8,7 @@ app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
 var DataCollectionService = require('./services/dataCollectionService');
-//var EthereumSpyDb = require('./ethereumSpyDb');
+var EthereumSpyDb = require('./ethereumSpyDb');
 // var twitterConnectionInfo = {
 //     consumer_key: process.env.TWITTER_CONSUMER_KEY,
 //     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
