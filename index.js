@@ -9,12 +9,12 @@ app.set('view engine', 'handlebars');
 
 var DataCollectionService = require('./services/dataCollectionService');
 var EthereumSpyDb = require('./ethereumSpyDb');
-// var twitterConnectionInfo = {
-//     consumer_key: process.env.TWITTER_CONSUMER_KEY,
-//     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-//     access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-//     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-// };
+var twitterConnectionInfo = {
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+};
 // var bitcoinDataCollectionService = new DataCollectionService('BTC', process.env.ETHEREUM_SPY_DATABASE_CONN, twitterConnectionInfo);
 // bitcoinDataCollectionService.scheduleDataCollection();
 // var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
