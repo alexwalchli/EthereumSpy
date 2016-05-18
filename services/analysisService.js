@@ -35,6 +35,7 @@ class AnalysisService{
             var overallSentimentScore = _.reduce(tweets, function(sum, tweet){
                 return sum + tweet.sentimentScore;
             }, 0);
+            var averageTweetSentiment = overallSentimentScore / tweets.length;
             
             // back test against yesterday's prediction model
             var testResult = textClassifier.categorize(todaysTweetCorpus);
@@ -53,7 +54,10 @@ class AnalysisService{
                 numberOfTweets: tweets.length,
                 priceMovement: priceMovement,
                 priceChange: priceChange,
-                sentimentScore: overallSentimentScore
+                sentimentScore: overallSentimentScore,
+                averageTweetSentiment: averageTweetSentiment,
+                mostCriticalTweet: mostCriticalTweet.text,
+                mostPositiveTweet: mostPositiveTweet.text
             });
             
             textClassifier.learn(todaysTweetCorpus, priceChange);

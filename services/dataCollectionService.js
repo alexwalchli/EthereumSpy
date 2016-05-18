@@ -33,10 +33,13 @@ class DataCollectionService{
         nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-6hrs'); });
         
         // every 12 hours
-        nodeSchedule.scheduleJob('0 11,23 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-12hrs'); });
+        nodeSchedule.scheduleJob('0 10,22 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-12hrs'); });
         
         // every day
-        nodeSchedule.scheduleJob('0 23 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-24hrs', true); });
+        nodeSchedule.scheduleJob('0 13 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-24hrs'); });
+        
+        // clear the cache at everyday
+        nodeSchedule.scheduleJob('0 23 * * *', () => { this._clearDataCache(); });
         
         this._startTwitterStream();
         
@@ -101,18 +104,18 @@ class DataCollectionService{
         this.priceService.getPrice(this.coinTicker, (price) => { self.ethereumSpyDb.cachePrice(price); });
     }
     
-    _classifyDataAgainstPriceMovement(modelName, clearCache){
+    _classifyDataAgainstPriceMovement(modelName){
         var self = this;
         this.ethereumSpyDb.getAnalyzedTweetsFromCache((analyzedTweets) => {
             self.ethereumSpyDb.getPrices(self.coinTicker, (prices) => {
                self.analysisService.classifyTweetsAgainstPriceMovement(modelName, self.coinTicker, prices, analyzedTweets); 
             });
         });
-        
-        if(clearCache){
-            this.ethereumSpyDb.clearAnalyzedTweetCache();
-            this.ethereumSpyDb.clearPriceCache();
-        }
+    }
+    
+    _clearDataCache(){
+        this.ethereumSpyDb.clearAnalyzedTweetCache();
+        this.ethereumSpyDb.clearPriceCache();
     }
 }
 
