@@ -22,9 +22,10 @@ class DataCollectionService{
     }
     
     scheduleDataCollection(){
-
-        // every 45 seconds
-        nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
+        if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
+            // every 45 seconds
+            nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
+        }
         
         this.coinsTrackingInfo.forEach((coin) => {
             nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', 1); }); // for debugging
@@ -75,7 +76,7 @@ class DataCollectionService{
                 var analyzedTweet = {
                     coinTicker: coin.ticker,
                     text: tweet.text,
-                    timestamp: tweet.timestamp_ms,
+                    timestamp: parseInt(tweet.timestamp_ms),
                     sentimentScore: sentiment
                 }; 
                 this._cacheAnalyzedTweet(analyzedTweet);

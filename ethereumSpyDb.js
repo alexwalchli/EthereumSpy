@@ -69,8 +69,9 @@ class EthereumSpyDb{
     getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hours, callback){
         var ms = 60 * hours * 1000;
         var nHoursAgo = Date.now() - ms;
-        this.db.analyzedTweetCache.find({ coinTicker: coinTicker, "dt":{$gt:nHoursAgo}},
-                                         (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
+        this.db.analyzedTweetCache.find(
+            { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
+        }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }
     
     clearAnalyzedTweetCache(){
