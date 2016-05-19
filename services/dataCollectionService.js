@@ -13,8 +13,8 @@ class DataCollectionService{
         this.analysisService = new AnalysisService(databaseConnectionString);
         this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
         this.twitterConnectionInfo = twitterConnectionInfo;
-        this.twitterClients = {};
-        this.twitterConnTimeouts = {};
+        this.twitterClient;
+        this.twitterConnTimeout;
         this.coinsTrackingInfo = coinsTrackingInfo;
         this.tweets = [];
         
@@ -42,57 +42,53 @@ class DataCollectionService{
         // clear the cache everyday
         nodeSchedule.scheduleJob('0 23 * * *', () => { this._clearDataCache(); });
         
-        this._startTwitterStreams();
+        this._startTwitterStream();
         
         console.log('Data Collection scheduled');
     }
     
-    _startTwitterStreams(){
-        // starting more than 1 stream at the same time results in a 420, Enhance your calm
-        for (let i=0; i< this.coinsTrackingInfo.length; i++) {
-            let coin = this.coinsTrackingInfo[i];
-            setTimeout(() => {
-                this._restartTwitter(coin);   
-            }, i*5000 );
-        }
-    }
-    
-    _startTwitterStream(coin){
+    _startTwitterStream(){
+        console.log('Initializing Twitter connection...');
+        this.twitterClient = new Twitter(this.twitterConnectionInfo);
+        // TODO: get all coins and add each phrase in a comma delimeted list,
+        // we only need 1 stream.
+        var terms = [];
+        this.coinsTrackingInfo.forEach((coin) => { terms.push(coin.phrase); });
+        var phrase = terms.join(',');
         var self = this;
-        this._resetTwitterTimeout(coin);
-        this.twitterClients[coin.ticker].stream('statuses/filter', {track: coin.phrase}, 
+        this._resetTwitterTimeout();
+        this.twitterClient.stream('statuses/filter', {track: phrase}, 
             (stream) => {
-                console.log('Streaming Twitter with phrase: ' + coin.phrase);
-                stream.on('data', (tweet) => { self._onNewTweet(coin, tweet); });
-                stream.on('error', (tweet) => { self._onTwitterError(coin, tweet); });
+                console.log('Streaming Twitter with phrase: ' + phrase);
+                stream.on('data', (tweet) => { self._onNewTweet(tweet); });
+                stream.on('error', (tweet) => { self._onTwitterError(tweet); });
             });
     }
     
-    _onNewTweet(coin, tweet){
-        this._resetTwitterTimeout(coin);
+    _onNewTweet(tweet){
+        this._resetTwitterTimeout();
+        // this could be from any tweet, determine which coin this is for
         var sentiment = this.sentimentService.getSentiment(tweet.text);
-        var analyzedTweet = {
-            coinTicker: coin.ticker,
-            text: tweet.text,
-            timestamp: tweet.timestamp_ms,
-            sentimentScore: sentiment
-        }; 
-        this._cacheAnalyzedTweet(analyzedTweet);
-        console.log('Handled new Tweet.');
-    }
-    
-    _resetTwitterTimeout(coin){
-        if(this.twitterConnTimeouts[coin.ticker]){
-            clearTimeout(this.twitterConnTimeouts[coin.ticker]);
-        }
         
-        this.twitterConnTimeouts[coin.ticker] = setTimeout(() => { this._restartTwitter(coin); }, 60000);
+        this.coinsTrackingInfo.forEach((coin) => {
+           if(tweet.text.toLowerCase().indexOf(coin.phrase.toLowerCase()) > -1){
+                var analyzedTweet = {
+                    coinTicker: coin.ticker,
+                    text: tweet.text,
+                    timestamp: tweet.timestamp_ms,
+                    sentimentScore: sentiment
+                }; 
+                this._cacheAnalyzedTweet(analyzedTweet);
+                console.log('Handled new "' + coin.ticker + '" Tweet.');
+           }
+        });
     }
     
-    _restartTwitter(coin){
-        console.log('Initializing Twitter connection for coin ' + coin.ticker + '...');
-        this.twitterClients[coin.ticker] = new Twitter(this.twitterConnectionInfo);
-        this._startTwitterStream(coin);
+    _resetTwitterTimeout(){
+        if(this.twitterConnTimeout){
+            clearTimeout(this.twitterConnTimeout);
+        }
+        this.twitterConnTimeout = setTimeout(() => { this._startTwitterStream(); }, 60000);
     }
     
     _cacheAnalyzedTweet(analyzedTweet){
@@ -108,8 +104,8 @@ class DataCollectionService{
         }
     }
     
-    _onTwitterError(coin, error){
-        console.log('Error while streaming Tweets for ' + coin.ticker + ': ' + error);
+    _onTwitterError(error){
+        console.log('Error while streaming Tweets: ' + error);
     }
     
     _retrieveCoinPrices(){
