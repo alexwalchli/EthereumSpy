@@ -48,9 +48,13 @@ class DataCollectionService{
     }
     
     _startTwitterStreams(){
-        this.coinsTrackingInfo.forEach((coin) => {
-            this._restartTwitter(coin);
-        });
+        // starting more than 1 stream at the same time results in a 420, Enhance your calm
+        for (let i=0; i< this.coinsTrackingInfo.length; i++) {
+            let coin = this.coinsTrackingInfo[i];
+            setTimeout(() => {
+                this._restartTwitter(coin);   
+            }, i*5000 );
+        }
     }
     
     _startTwitterStream(coin){
