@@ -22,14 +22,13 @@ class DataCollectionService{
     }
     
     scheduleDataCollection(){
-        if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
-            // every 45 seconds
-            nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
-        }
+        // every 45 seconds
+        nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
         
         this.coinsTrackingInfo.forEach((coin) => {
-            nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', 1); }); // for debugging
-            
+            if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
+                nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', 1); }); // for debugging
+            }
             // every 6 hours
             nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-6hrs', 6); });
             

@@ -18,6 +18,8 @@
                     <th>Sentiment</th>
                     <th>Number of Tweets</th>
                     <th>Price Movement</th>
+                    <th>Most Critical</th>
+                    <th>Most Positive</th>
                 </tr>    
             </thead>  
             <tbody>
@@ -27,9 +29,11 @@
                         <td>{{this.coinTicker}}</td>
                         <td>{{this.timestamp}}</td>
                         <td>{{this.predictedCorrectly}}</td>
-                        <td>{{this.sentimentScore}}</td>
+                        <td>{{this.sentimentScore}} ( {{this.averageTweetSentiment}} avg)</td>
                         <td>{{this.numberOfTweets}}</td>
                         <td>{{this.priceMovement}}({{this.priceChange}})</td>
+                        <td>{{this.mostCriticalTweet}}</td>
+                        <td>{{this.mostPositiveTweet}}</td>
                     </tr>
                 {{/each}}
             </tbody>  
