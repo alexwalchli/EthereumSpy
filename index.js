@@ -35,9 +35,7 @@ if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
 
 app.get('/', function(req, res) {
     ethereumSpyDb.getPriceMovementPredictionResults(function(results){
-        var modelAccuracy = _.filter(results, { predictedCorrectly: true }).length / results.length;
-        
-        res.render('home', { modelAccuracy: modelAccuracy, results: results });
+        res.render('home', { results: results });
     });
 });
 

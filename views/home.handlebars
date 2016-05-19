@@ -6,8 +6,6 @@
 </div>
 <div class="row">
     <div class="columns large-12">
-        <p><strong>BTC Model Accuracy: {{modelAccuracy}}%</strong></p>
-        <p><strong>BTC Results</strong></p>
         <table>
             <thead>
                 <tr>
@@ -25,15 +23,15 @@
             <tbody>
                 {{#each results}}
                     <tr>
-                        <td>{{this.modelName}}</td>
-                        <td>{{this.coinTicker}}</td>
-                        <td>{{this.timestamp}}</td>
-                        <td>{{this.predictedCorrectly}}</td>
-                        <td>{{this.sentimentScore}} ( {{this.averageTweetSentiment}} avg)</td>
-                        <td>{{this.numberOfTweets}}</td>
-                        <td>{{this.priceMovement}}({{this.priceChange}})</td>
-                        <td>{{this.mostCriticalTweet}}</td>
-                        <td>{{this.mostPositiveTweet}}</td>
+                        <td><small>{{this.modelName}}</small></td>
+                        <td>{{this.coinTicker}}</small></td>
+                        <td><small>{{this.timestamp}}</small></td>
+                        <td><small>{{this.predictedCorrectly}}</small></td>
+                        <td><small>{{this.sentimentScore}} ( {{this.averageTweetSentiment}} avg)</small></td>
+                        <td><small>{{this.numberOfTweets}}</small></td>
+                        <td><small>{{this.priceMovement}}({{this.priceChange}})</small></td>
+                        <td><small>{{this.mostCriticalTweet}}</small></td>
+                        <td><small>{{this.mostPositiveTweet}}</small></td>
                     </tr>
                 {{/each}}
             </tbody>  
