@@ -8,7 +8,7 @@ class AnalysisService{
     }
     
     classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, tweets){
-        console.log('Running ' + modelName + ' classification');
+        console.log('Running ' + modelName + ' for ' + coinTicker + ' price prediction');
         if(!tweets || tweets.length === 0 || !prices || prices.length === 0){
             console.log('Skipping analysis, no Tweets or Prices');
             return;

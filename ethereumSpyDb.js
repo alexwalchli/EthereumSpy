@@ -66,10 +66,11 @@ class EthereumSpyDb{
         this.db.analyzedTweetCache.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback ); });
     }
     
-    getAnalyzedTweetsFromCacheFromLastNHours(callback, hours){
+    getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hours, callback){
         var ms = 60 * hours * 1000;
-        var nHoursAgo = new Date.now() - ms;
-        this.db.analyzedTweetCache.find({"dt":{$gt:nHoursAgo}}, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
+        var nHoursAgo = Date.now() - ms;
+        this.db.analyzedTweetCache.find({ coinTicker: coinTicker, "dt":{$gt:nHoursAgo}},
+                                         (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }
     
     clearAnalyzedTweetCache(){

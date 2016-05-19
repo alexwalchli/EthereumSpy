@@ -7,59 +7,68 @@ var EthereumSpyDb = require('../ethereumSpyDb');
 var nodeSchedule = require('node-schedule');
 
 class DataCollectionService{
-    constructor(coinTicker, databaseConnectionString, twitterConnectionInfo){
+    constructor(coinsTrackingInfo, databaseConnectionString, twitterConnectionInfo){
         this.priceService = new PriceService();
         this.sentimentService = new SentimentService();
         this.analysisService = new AnalysisService(databaseConnectionString);
         this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
         this.twitterConnectionInfo = twitterConnectionInfo;
-        this.twitterClient = new Twitter(this.twitterConnectionInfo);
-        this.twitterConnTimeout;
-        this.coinTicker = coinTicker;
+        this.twitterClients = {};
+        this.twitterConnTimeouts = {};
+        this.coinsTrackingInfo = coinsTrackingInfo;
         this.tweets = [];
-        
-        
         
         console.log('Data Collection initialized');
     }
     
     scheduleDataCollection(){
-        //nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-debugging'); }); // for debugging
 
         // every 45 seconds
-        nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrice(); });
+        nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
         
-        // every 6 hours
-        nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-6hrs'); });
+        this.coinsTrackingInfo.forEach((coin) => {
+            nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', 1); }); // for debugging
+            
+            // every 6 hours
+            nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-6hrs', 6); });
+            
+            // every 12 hours
+            nodeSchedule.scheduleJob('0 10,22 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-every-12hrs', 12); });
+            
+            // every day
+            nodeSchedule.scheduleJob('0 13 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-24hrs', 24); }); 
+        });
         
-        // every 12 hours
-        nodeSchedule.scheduleJob('0 10,22 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-12hrs'); });
-        
-        // every day
-        nodeSchedule.scheduleJob('0 13 * * *', () => { this._classifyDataAgainstPriceMovement('tweets-btc-every-24hrs'); });
-        
-        // clear the cache at everyday
+        // clear the cache everyday
         nodeSchedule.scheduleJob('0 23 * * *', () => { this._clearDataCache(); });
         
-        this._startTwitterStream();
+        this._startTwitterStreams();
         
         console.log('Data Collection scheduled');
     }
     
-    _startTwitterStream(){
-        this._resetTwitterTimeout();
-        this.twitterClient.stream('statuses/filter', {track: 'bitcoin'}, 
+    _startTwitterStreams(){
+        this.coinsTrackingInfo.forEach((coin) => {
+            this._restartTwitter(coin);
+        });
+    }
+    
+    _startTwitterStream(coin){
+        var self = this;
+        this._resetTwitterTimeout(coin);
+        this.twitterClients[coin.ticker].stream('statuses/filter', {track: coin.phrase}, 
             (stream) => {
-                console.log('Streaming Twitter...');
-                stream.on('data', this._onNewTweet.bind(this));
-                stream.on('error', this._onTwitterError.bind(this));
+                console.log('Streaming Twitter with phrase: ' + coin.phrase);
+                stream.on('data', (tweet) => { self._onNewTweet(coin, tweet); });
+                stream.on('error', (tweet) => { self._onTwitterError(coin, tweet); });
             });
     }
     
-    _onNewTweet(tweet){
-        this._resetTwitterTimeout();
+    _onNewTweet(coin, tweet){
+        this._resetTwitterTimeout(coin);
         var sentiment = this.sentimentService.getSentiment(tweet.text);
         var analyzedTweet = {
+            coinTicker: coin.ticker,
             text: tweet.text,
             timestamp: tweet.timestamp_ms,
             sentimentScore: sentiment
@@ -68,47 +77,50 @@ class DataCollectionService{
         console.log('Handled new Tweet.');
     }
     
-    _resetTwitterTimeout(){
-        if(this.twitterConnTimeout){
-            clearTimeout(this.twitterConnTimeout);
+    _resetTwitterTimeout(coin){
+        if(this.twitterConnTimeouts[coin.ticker]){
+            clearTimeout(this.twitterConnTimeouts[coin.ticker]);
         }
         
-        this.twitterConnTimeout = setTimeout(() => { this._restartTwitter(); }, 60000);
+        this.twitterConnTimeouts[coin.ticker] = setTimeout(() => { this._restartTwitter(coin); }, 60000);
     }
     
-    _restartTwitter(){
-        console.log('Twitter connection dropped after 60secs, restarting...');
-        this.twitterClient = new Twitter(this.twitterConnectionInfo);
-        this._startTwitterStream();
+    _restartTwitter(coin){
+        console.log('Initializing Twitter connection for coin ' + coin.ticker + '...');
+        this.twitterClients[coin.ticker] = new Twitter(this.twitterConnectionInfo);
+        this._startTwitterStream(coin);
     }
     
     _cacheAnalyzedTweet(analyzedTweet){
         this.tweets.push(analyzedTweet);
         
-        if(this.tweets.length > 10){
-            var firstTenTweets = this.tweets.slice(0, 10);
-            this.tweets.splice.call(this.tweets, 0, 10);
-            this.ethereumSpyDb.cacheAnalyzedTweets(firstTenTweets, () => {
-               console.log('Cached 10 tweets');
+        var bulkInsertAmount = 50;
+        if(this.tweets.length > bulkInsertAmount){
+            var firstNTweets = this.tweets.slice(0, bulkInsertAmount);
+            this.tweets.splice.call(this.tweets, 0, bulkInsertAmount);
+            this.ethereumSpyDb.cacheAnalyzedTweets(firstNTweets, () => {
+               console.log('Cached ' + bulkInsertAmount + ' tweets');
             });
         }
     }
     
-    _onTwitterError(error){
-        console.log('Error while streaming Tweets: ' + error);
+    _onTwitterError(coin, error){
+        console.log('Error while streaming Tweets for ' + coin.ticker + ': ' + error);
     }
     
-    _retrieveCoinPrice(){
-        console.log('Retrieving price for ' + this.coinTicker);
-        var self = this;
-        this.priceService.getPrice(this.coinTicker, (price) => { self.ethereumSpyDb.cachePrice(price); });
+    _retrieveCoinPrices(){
+        this.coinsTrackingInfo.forEach((coin) => {
+            console.log('Retrieving price for ' + coin.ticker);
+            var self = this;
+            this.priceService.getPrice(coin.ticker, (price) => { self.ethereumSpyDb.cachePrice(price); }); 
+        });
     }
     
-    _classifyDataAgainstPriceMovement(modelName){
+    _classifyDataAgainstPriceMovement(coinTicker, modelName, hoursOfData){
         var self = this;
-        this.ethereumSpyDb.getAnalyzedTweetsFromCache((analyzedTweets) => {
-            self.ethereumSpyDb.getPrices(self.coinTicker, (prices) => {
-               self.analysisService.classifyTweetsAgainstPriceMovement(modelName, self.coinTicker, prices, analyzedTweets); 
+        this.ethereumSpyDb.getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hoursOfData, (analyzedTweets) => {
+            self.ethereumSpyDb.getPrices(coinTicker, (prices) => {
+                self.analysisService.classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, analyzedTweets); 
             });
         });
     }
