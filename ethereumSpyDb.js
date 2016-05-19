@@ -6,7 +6,7 @@ class EthereumSpyDb{
         var mongojs = require('mongojs');
         this.db = mongojs(connectionString, 
             ['analysisResults', 
-             'priceMovementPredictionModel',
+             'priceMovementPredictionModels',
              'priceMovementPredictionResults',
              'analyzedTweetCache',
              'priceCache']);
@@ -36,11 +36,11 @@ class EthereumSpyDb{
             modelName: modelName,
             textClassifierJson: textClassifierJson  
         };
-        this.db.priceMovementPredictionModel.findOne({ modelName: modelName }, (model) => {
+        this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (model) => {
             if(model){
                 priceMovementPredictionModel._id = model._id;
             }
-            this.db.analysisResults.save(priceMovementPredictionModel, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+            this.db.priceMovementPredictionModels.save(priceMovementPredictionModel, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
         });
     }
     
