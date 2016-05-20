@@ -28,7 +28,7 @@ class EthereumSpyDb{
     }
     
     getPriceMovementPredictionModel(modelName, callback){
-        this.db.priceMovementPredictionModel.findOne({ modelName: modelName }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+        this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
     updatePriceMovementPredictionModel(modelName, textClassifierJson, callback){
@@ -36,7 +36,7 @@ class EthereumSpyDb{
             modelName: modelName,
             textClassifierJson: textClassifierJson  
         };
-        this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (model) => {
+        this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (error, model) => {
             if(model){
                 priceMovementPredictionModel._id = model._id;
             }
