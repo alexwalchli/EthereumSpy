@@ -34,8 +34,8 @@ if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
 }
 
 app.get('/', function(req, res) {
-    ethereumSpyDb.getPriceMovementPredictionResults(function(results){
-        res.render('home', { results: results });
+    ethereumSpyDb.getPriceMovementPredictions(function(predictions){
+        res.render('home', { predictions: predictions });
     });
 });
 

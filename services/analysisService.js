@@ -22,49 +22,49 @@ class AnalysisService{
         var self = this;
        
         this.ethereumSpyDb.getPriceMovementPredictionModel(modelName, (predictionModel) => {
-            var textClassifier = predictionModel ? bayes.fromJson(predictionModel.textClassifierJson)
-                                                : bayes();
-            var sentimentOrderedTweets = _.sortBy(tweets, function(tweet){
-                return tweet.sentimentScore;
+            this.ethereumSpyDb.getLastPriceMovementPrediction((lastPriceMovementPrediction) => {
+               var textClassifier = predictionModel ? bayes.fromJson(predictionModel.textClassifierJson)
+                                                    : bayes();
+                var tweetsOrderedBySentiment = _.sortBy(tweets, function(tweet){
+                    return tweet.sentimentScore;
+                });
+                var mostCriticalTweet = tweetsOrderedBySentiment[0];
+                var mostPositiveTweet = tweetsOrderedBySentiment[tweetsOrderedBySentiment.length - 1];
+                var tweetCorpus = _.reduce(tweets, function(corpus, tweet){
+                    return corpus + ' ' + tweet.text;
+                }, '');
+                var overallSentimentScore = _.reduce(tweets, function(sum, tweet){
+                    return sum + tweet.sentimentScore;
+                }, 0);
+                var averageTweetSentiment = overallSentimentScore / tweets.length;
+                
+                var previousPredictionCorrect = null;
+                if(lastPriceMovementPrediction){
+                    previousPredictionCorrect = lastPriceMovementPrediction.prediction == priceMovement;   
+                }
+                
+                textClassifier.learn(tweetCorpus, priceMovement);
+                self.ethereumSpyDb.updatePriceMovementPredictionModel(modelName, textClassifier.toJson(), () => {
+                    console.log('Price movement prediction model updated');
+                });
+                
+                var currentPrediction = textClassifier.categorize(tweetCorpus);
+                self.ethereumSpyDb.addPriceMovementPrediction({ 
+                    modelName: modelName,
+                    coinTicker: coinTicker,
+                    timestamp: Date.now(),
+                    previousPredictionCorrect: previousPredictionCorrect,
+                    prediction: currentPrediction,
+                    numberOfTweets: tweets.length,
+                    priceMovement: priceMovement,
+                    priceChange: priceChange,
+                    sentimentScore: overallSentimentScore,
+                    averageTweetSentiment: averageTweetSentiment,
+                    mostCriticalTweet: mostCriticalTweet.text,
+                    mostPositiveTweet: mostPositiveTweet.text
+                }); 
             });
-            var mostCriticalTweet = sentimentOrderedTweets[0];
-            var mostPositiveTweet = sentimentOrderedTweets[sentimentOrderedTweets.length - 1];
-            var todaysTweetCorpus = _.reduce(tweets, function(corpus, tweet){
-                return corpus + ' ' + tweet.text;
-            }, '');
-            var overallSentimentScore = _.reduce(tweets, function(sum, tweet){
-                return sum + tweet.sentimentScore;
-            }, 0);
-            var averageTweetSentiment = overallSentimentScore / tweets.length;
-            
-            // back test against yesterday's prediction model
-            var testResult = textClassifier.categorize(todaysTweetCorpus);
-            var modelPredictedCorrectly = testResult == priceMovement;
-            if(modelPredictedCorrectly){
-                console.log('Price movement prediction model categorized correctly');
-            } else {
-                console.log('Price movement prediction model categorized incorrectly'); 
-            }
-            
-            self.ethereumSpyDb.addPriceMovementPredictionResult({ 
-                modelName: modelName,
-                coinTicker: coinTicker,
-                timestamp: Date.now(),
-                predictedCorrectly: modelPredictedCorrectly,
-                numberOfTweets: tweets.length,
-                priceMovement: priceMovement,
-                priceChange: priceChange,
-                sentimentScore: overallSentimentScore,
-                averageTweetSentiment: averageTweetSentiment,
-                mostCriticalTweet: mostCriticalTweet.text,
-                mostPositiveTweet: mostPositiveTweet.text
-            });
-            
-            textClassifier.learn(todaysTweetCorpus, priceChange);
-            self.ethereumSpyDb.updatePriceMovementPredictionModel(modelName, textClassifier.toJson(), () => {
-                console.log('Price movement prediction model updated');
-            });
-        }, this);   
+        });   
     }
 }
 

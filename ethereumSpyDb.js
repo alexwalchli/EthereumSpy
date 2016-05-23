@@ -5,9 +5,8 @@ class EthereumSpyDb{
     constructor(connectionString){
         var mongojs = require('mongojs');
         this.db = mongojs(connectionString, 
-            ['analysisResults', 
-             'priceMovementPredictionModels',
-             'priceMovementPredictionResults',
+            ['priceMovementPredictionModels',
+             'priceMovementPredictions',
              'analyzedTweetCache',
              'priceCache']);
         this.db.on('error', function (err) {
@@ -19,12 +18,9 @@ class EthereumSpyDb{
         });
     }
     
-    getAnalysisResults(callback){
-        this.db.analysisResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
-    }
-    
-    saveAnalysisResults(saveAnalysisResults, callback){
-        this.db.analysisResults.save(saveAnalysisResults, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+    getLastPriceMovementPrediction(callback){
+        this.db.priceMovementPredictions.findOne({$query: {}, $orderby: {$natural : -1}},
+            (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
     getPriceMovementPredictionModel(modelName, callback){
@@ -44,12 +40,12 @@ class EthereumSpyDb{
         });
     }
     
-    addPriceMovementPredictionResult(result){
-        this.db.priceMovementPredictionResults.insert(result);
+    addPriceMovementPrediction(prediction){
+        this.db.priceMovementPredictions.insert(prediction);
     }
     
-    getPriceMovementPredictionResults(callback){
-        this.db.priceMovementPredictionResults.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+    getPriceMovementPredictions(callback){
+        this.db.priceMovementPredictions.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
     cacheAnalyzedTweets(analyzedTweets, callback){
@@ -88,7 +84,7 @@ class EthereumSpyDb{
     }
     
     clearPriceCache(coinTicker){
-        console.log('Clearing Price Cache');
+        console.log('Clearing ' + coinTicker  + ' Price Cache');
         this.db.remove({ coinTicker: coinTicker }, false);
     }
     

@@ -50,8 +50,6 @@ class DataCollectionService{
     _startTwitterStream(){
         console.log('Initializing Twitter connection...');
         this.twitterClient = new Twitter(this.twitterConnectionInfo);
-        // TODO: get all coins and add each phrase in a comma delimeted list,
-        // we only need 1 stream.
         var terms = [];
         this.coinsTrackingInfo.forEach((coin) => { terms.push(coin.phrase); });
         var phrase = terms.join(',');
@@ -67,7 +65,6 @@ class DataCollectionService{
     
     _onNewTweet(tweet){
         this._resetTwitterTimeout();
-        // this could be from any tweet, determine which coin this is for
         var sentiment = this.sentimentService.getSentiment(tweet.text);
         
         this.coinsTrackingInfo.forEach((coin) => {
