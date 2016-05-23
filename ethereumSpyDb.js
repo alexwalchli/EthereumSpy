@@ -93,8 +93,10 @@ class EthereumSpyDb{
         this.db.getCollectionNames((err, colNames) => {
             _.forEach(colNames, (collection_name) => {
                 if (collection_name.indexOf("system.") == -1){
-                    this.db[collection_name].drop();
-                    console.log('Cleared ' + collection_name + ' collection');
+                    if(this.db[collection_name]){
+                        this.db[collection_name].drop();
+                        console.log('Cleared ' + collection_name + ' collection');   
+                    }
                 }
             });
         });

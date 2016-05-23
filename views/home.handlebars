@@ -9,15 +9,15 @@
         <table>
             <thead>
                 <tr>
-                    <th>Model Name</th>
+                    <th><small>Model Name</small></th>
                     <th>Coin</th>
-                    <th>Timestamp</th>
-                    <th>Predicted Correctly?</th>
-                    <th>Sentiment</th>
-                    <th>Number of Tweets</th>
-                    <th>Price Movement</th>
-                    <th>Most Critical</th>
-                    <th>Most Positive</th>
+                    <th><small>Current Prediction</small></th>
+                    <th><small>Last model predicted correctly?</small></th>
+                    <th><small>Sentiment</small></th>
+                    <th><small>Number of Tweets</small></th>
+                    <th><small>Price Movement</small></th>
+                    <th><small>Most Critical</small></th>
+                    <th><small>Most Positive</small></th>
                 </tr>    
             </thead>  
             <tbody>
@@ -25,8 +25,8 @@
                     <tr>
                         <td><small>{{this.modelName}}</small></td>
                         <td>{{this.coinTicker}}</small></td>
-                        <td><small>{{this.timestamp}}</small></td>
-                        <td><small>{{this.predictedCorrectly}}</small></td>
+                        <td>{{this.prediction}}</td>
+                        <td><small>{{this.previousPredictionCorrect}}</small></td>
                         <td><small>{{this.sentimentScore}} ( {{this.averageTweetSentiment}} avg)</small></td>
                         <td><small>{{this.numberOfTweets}}</small></td>
                         <td><small>{{this.priceMovement}}({{this.priceChange}})</small></td>
