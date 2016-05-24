@@ -116,7 +116,7 @@ class DataCollectionService{
     _classifyDataAgainstPriceMovement(coinTicker, modelName, hoursOfData){
         var self = this;
         this.ethereumSpyDb.getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hoursOfData, (analyzedTweets) => {
-            self.ethereumSpyDb.getPrices(coinTicker, (prices) => {
+            self.ethereumSpyDb.getPricesFromCacheFromLastNHours(coinTicker, hoursOfData, (prices) => {
                 self.analysisService.classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, analyzedTweets); 
             });
         });

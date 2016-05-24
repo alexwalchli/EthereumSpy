@@ -5,36 +5,34 @@
     </div>
 </div>
 <div class="row">
-    <div class="columns large-12">
+    {{#each models}}
+    <div class="columns small-6 columns">
+        <h4>{{this._id}}</h4>
         <table>
             <thead>
                 <tr>
-                    <th><small>Model Name</small></th>
-                    <th>Coin</th>
-                    <th><small>Current Prediction</small></th>
-                    <th><small>Last model predicted correctly?</small></th>
-                    <th><small>Sentiment</small></th>
-                    <th><small>Number of Tweets</small></th>
-                    <th><small>Price Movement</small></th>
-                    <th><small>Most Critical</small></th>
-                    <th><small>Most Positive</small></th>
-                </tr>    
-            </thead>  
+                    <th>Results</th>
+                </tr>
+            </thead>
             <tbody>
-                {{#each predictions}}
-                    <tr>
-                        <td><small>{{this.modelName}}</small></td>
-                        <td>{{this.coinTicker}}</small></td>
-                        <td>{{this.prediction}}</td>
-                        <td><small>{{this.previousPredictionCorrect}}</small></td>
-                        <td><small>{{this.sentimentScore}} ( {{this.averageTweetSentiment}} avg)</small></td>
-                        <td><small>{{this.numberOfTweets}}</small></td>
-                        <td><small>{{this.priceMovement}}({{this.priceChange}})</small></td>
-                        <td><small>{{this.mostCriticalTweet}}</small></td>
-                        <td><small>{{this.mostPositiveTweet}}</small></td>
-                    </tr>
+                {{#each this.predictions}}
+                <tr>
+                    <td>
+                        <strong>Prediction: {{this.prediction}} movement</strong><br>
+                        <strong><small>Last Prediction Correct?: {{this.previousPredictionCorrect}}</small></strong><br>
+                        <small>{{this.priceChange}}</small>
+                        <small>{{this.sentimentScore}} ({{this.averageTweetSentiment}} avg)</small>
+                        <small>
+                            Total #: {{this.numberOfTweets}}<br>
+                            Most Critical: <small style="font-size:.5em">{{this.mostCriticalTweet}}</small><br>
+                            Most Positive: <small style="font-size:.5em">{{this.mostPositiveTweet}}</small>
+                        </small>
+                    </td>    
+                </tr>
                 {{/each}}
-            </tbody>  
+            </tbody>
         </table>
-    </div>    
+        
+    </div>
+    {{/each}}  
 </div>

@@ -45,7 +45,9 @@ class EthereumSpyDb{
     }
     
     getPriceMovementPredictions(callback){
-        this.db.priceMovementPredictions.find((error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+        this.db.priceMovementPredictions.aggregate([
+            { $group : { _id : "$modelName", predictions: { $push: "$$ROOT" } } }
+        ], (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
     cacheAnalyzedTweets(analyzedTweets, callback){
@@ -75,8 +77,12 @@ class EthereumSpyDb{
         this.db.analyzedTweetCache.drop();
     }
     
-    getPrices(coinTicker, callback){
-        this.db.priceCache.find({ coinTicker: coinTicker}, (error, prices) => { this._handleDatabaseResponse(error, prices, callback); });
+    getPricesFromCacheFromLastNHours(coinTicker, hours, callback){
+        var ms = 60 * hours * 1000;
+        var nHoursAgo = Date.now() - ms;
+        this.db.analyzedTweetCache.find(
+            { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
+        }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }
     
     cachePrice(price){
