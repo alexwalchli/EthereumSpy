@@ -8,6 +8,7 @@
     {{#each models}}
     <div class="columns small-6 columns">
         <h4>{{this._id}}</h4>
+        <strong>Prediction Accuracy: {{this.predictionAccuracy}}%
         <table>
             <thead>
                 <tr>
@@ -19,11 +20,19 @@
                 <tr>
                     <td>
                         <strong>Prediction: {{this.prediction}} movement</strong><br>
-                        <strong><small>Last Prediction Correct?: {{this.previousPredictionCorrect}}</small></strong><br>
-                        <small>{{this.priceChange}}</small>
-                        <small>{{this.sentimentScore}} ({{this.averageTweetSentiment}} avg)</small>
+                        <strong><small>
+                            {{#if this.previousPredictionCorrect}}
+                            <span style="background-color:#3FFF7F">Last Prediction Correct</span>
+                            {{else}}
+                            <span style="background-color:#FF3F3F">Last Prediction Incorrect</span>
+                            {{/if}}
+                        </small></strong>
+                        <br>
+                        <small>Price Change: {{this.priceChange}}</small>
+                        <small>Sentiment Score: {{this.sentimentScore}} ({{this.averageTweetSentiment}} avg)</small>
+                        <br>
                         <small>
-                            Total #: {{this.numberOfTweets}}<br>
+                            # of Tweets: {{this.numberOfTweets}}<br>
                             Most Critical: <small style="font-size:.5em">{{this.mostCriticalTweet}}</small><br>
                             Most Positive: <small style="font-size:.5em">{{this.mostPositiveTweet}}</small>
                         </small>

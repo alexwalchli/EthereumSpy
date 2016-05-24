@@ -2,7 +2,23 @@ var _ = require('lodash');
 var express = require('express');
 var exphbs  = require('express-handlebars');
 var app = express();
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+
+var handlebarHelpers = {
+    equal: function(lvalue, rvalue, options) {
+        if (arguments.length < 3)
+            throw new Error("Handlebars Helper equal needs 2 parameters");
+        if( lvalue!=rvalue ) {
+            return options.inverse(this);
+        } else {
+            return options.fn(this);
+        }
+    }  
+};
+
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main',
+    helpers: handlebarHelpers
+}));
 app.set('view engine', 'handlebars');
 
 var DataCollectionService = require('./services/dataCollectionService');
@@ -35,6 +51,14 @@ if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
 
 app.get('/', function(req, res) {
     ethereumSpyDb.getPriceMovementPredictions((predictionModels) => {
+        predictionModels.forEach((predictionModel) => {
+            var correctPredictions = predictionModel.predictions.filter((prediction) => {
+                return prediction.previousPredictionCorrect;
+            });
+            
+            predictionModel.predictionAccuracy = Math.round(correctPredictions.length / predictionModel.predictions.length * 100);
+        });
+        
         res.render('home', { models: predictionModels });
     });
 });
