@@ -11,7 +11,7 @@ class PriceService{
                     price: responseObj.ticker.price,
                     volume: responseObj.volume,
                     change: responseObj.change,
-                    timestamp: responseObj.timestamp
+                    timestamp: responseObj.timestamp * 1000 // ms
                 });
             }
         });

@@ -46,6 +46,10 @@ class EthereumSpyDb{
         this.db.priceMovementPredictions.insert(prediction);
     }
     
+    getPredictionsByModel(modelName, callback){
+        this.db.priceMovementPredictions.find({ modelName: modelName }, (error, resp) => this._handleDatabaseResponse(error, resp, callback));
+    }
+    
     getPredictionsGroupedByModels(callback){
         this.db.priceMovementPredictions.aggregate([
             { $group : { _id : "$modelName", predictions: { $push: "$$ROOT" } } }
@@ -60,7 +64,7 @@ class EthereumSpyDb{
                     predictionCount: { $sum: 1 },
                     correctPredictionCount: {$sum: {$cond: [{$eq: ['$predictionWasCorrect', true]}, 1, 0]}},
                     currentPrediction: { $last: "$predictionForNextInterval" },
-                    currentPredictionPredictedOn : { $last: "$timestamp"}
+                    currentPredictionPredictedOn : { $last: "$unixTimestamp"}
                 } 
             }, 
             { 
@@ -118,7 +122,7 @@ class EthereumSpyDb{
     getPricesFromCacheFromLastNHours(coinTicker, hours, callback){
         var ms = 60 * hours * 1000;
         var nHoursAgo = Date.now() - ms;
-        this.db.analyzedTweetCache.find(
+        this.db.priceCache.find(
             { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
         }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }

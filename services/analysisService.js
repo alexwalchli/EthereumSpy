@@ -54,6 +54,7 @@ class AnalysisService{
                     modelLabel: modelLabel,
                     coinTicker: coinTicker,
                     timestamp: Date.now(),
+                    unixTimestamp: Math.floor(Date.now() / 1000),
                     predictionWasCorrect: null, // updated at next interval
                     predictionForNextInterval: predictionForNextInterval,
                     numberOfTweets: tweets.length,

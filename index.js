@@ -46,7 +46,7 @@ bitcoinDataCollectionService.scheduleDataCollection();
 var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
 if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
-    //ethereumSpyDb.clearDatabase();
+    ethereumSpyDb.clearDatabase();
 }
 
 app.get('/', function(req, res){
@@ -55,18 +55,15 @@ app.get('/', function(req, res){
     });
 });
 
-app.get('/console', function(req, res) {
-    ethereumSpyDb.getPredictionsGroupedByModels((predictionModels) => {
-        predictionModels.forEach((predictionModel) => {
-            var correctPredictions = predictionModel.predictions.filter((prediction) => {
-                return prediction.previousPredictionCorrect;
-            });
-            
-            predictionModel.predictionVetted = predictionModel.predictionWasCorrect !== null;
-            predictionModel.predictionAccuracy = Math.round(correctPredictions.length / predictionModel.predictions.length * 100);
+app.get('/history/:modelName', function(req, res){
+    var modelName = req.param('modelName');
+    ethereumSpyDb.getPredictionsByModel(modelName, (predictions) => {
+        var correctPredictions = predictions.filter((prediction) => {
+            return prediction.predictionWasCorrect;
         });
         
-        res.render('console', { models: predictionModels });
+        var predictionAccuracy = Math.round(correctPredictions.length / predictions.length * 100);
+        res.render('history', { modelName: modelName, predictions: predictions, predictionAccuracy: predictionAccuracy }); 
     });
 });
 

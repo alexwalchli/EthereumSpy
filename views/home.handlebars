@@ -13,6 +13,7 @@
                 <th>Model</th>
                 <th>Current Prediction</th>
                 <th>Accuracy</th>
+                <th>&nbsp;</th>
             </thead>
             {{#each this.models}}
             <tr>
@@ -21,14 +22,11 @@
                     <strong>{{this.currentPrediction}}</strong> as of 
                     <span class="smartdate" data-timestamp="{{this.currentPredictionPredictedOn}}"></span>
                 </td>
-                <td>{{this.predictionAccuracy}}</td>
+                <td>{{this.predictionAccuracy}}%</td>
+                <td><a href="/history/{{{this.modelName}}}">History</a></td>
             </tr>
             {{/each}}
         </table>
     </div>
     {{/each}}  
 </div>
-<script src="/public/smartdate.min.js"></script>
-<script>
-  smartdate.init();
-</script> 

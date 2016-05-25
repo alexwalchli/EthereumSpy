@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="columns large-12">
+        <h4>{{modelName}}</h4>
+        <strong>Prediction Accuracy: {{this.predictionAccuracy}}%
+        <table>
+            <thead>
+                <tr>
+                    <th>Results</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each this.predictions}}
+                <tr>
+                    <td>
+                        {{#if this.predictionWasCorrect}}
+                        <span style="color:#3FFF7F">Correctly </span>
+                        {{else}}
+                        <span style="color:#FF3F3F">Incorrectly </span>
+                        {{/if}}
+                        predicted {{this.predictionForNextInterval}} price movement
+                        </strong>
+                        <br>
+                        <small>
+                            <span class="smartdate" data-timestamp="{{this.unixTimestamp}}"></span>
+                        </small>
+                        <br>
+                        <small>Price Change: {{this.priceChange}}</small>
+                        <br>
+                        <small>Sentiment Score: {{this.sentimentScore}} ({{this.averageTweetSentiment}} avg)</small>
+                        <br>
+                        <small>
+                            # of Tweets: {{this.numberOfTweets}}<br>
+                            Most Critical: <small style="font-size:.5em">{{this.mostCriticalTweet}}</small><br>
+                            Most Positive: <small style="font-size:.5em">{{this.mostPositiveTweet}}</small>
+                        </small>
+                    </td>    
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
