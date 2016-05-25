@@ -26,17 +26,25 @@ class DataCollectionService{
         nodeSchedule.scheduleJob('45 * * * * *', () => { this._retrieveCoinPrices(); });
         
         this.coinsTrackingInfo.forEach((coin) => {
-            if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
-                nodeSchedule.scheduleJob('1 * * * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', 1); }); // for debugging
+            if(process.env.NODE_ENV == 'development'){
+                nodeSchedule.scheduleJob('1 * * * * *', () => { 
+                    this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', '6 hour prediction', 1); 
+                });
             }
             // every 6 hours
-            nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-6hrs', 6); });
+            nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { 
+                this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-6hrs', '6 hour prediction', 6); 
+            });
             
             // every 12 hours
-            nodeSchedule.scheduleJob('0 10,22 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-every-12hrs', 12); });
+            nodeSchedule.scheduleJob('0 10,22 * * *', () => { 
+                this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-every-12hrs', '12 hour prediction', 12);
+            });
             
             // every day
-            nodeSchedule.scheduleJob('0 13 * * *', () => { this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-24hrs', 24); }); 
+            nodeSchedule.scheduleJob('0 13 * * *', () => { 
+                this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-24hrs', 'Daily prediction', 24); 
+            }); 
         });
         
         // clear the cache everyday
@@ -113,11 +121,11 @@ class DataCollectionService{
         });
     }
     
-    _classifyDataAgainstPriceMovement(coinTicker, modelName, hoursOfData){
+    _classifyDataAgainstPriceMovement(coinTicker, modelName, modelLabel, hoursOfData){
         var self = this;
         this.ethereumSpyDb.getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hoursOfData, (analyzedTweets) => {
             self.ethereumSpyDb.getPricesFromCacheFromLastNHours(coinTicker, hoursOfData, (prices) => {
-                self.analysisService.classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, analyzedTweets); 
+                self.analysisService.classifyTweetsAgainstPriceMovement(modelName, modelLabel, coinTicker, prices, analyzedTweets); 
             });
         });
     }

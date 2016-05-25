@@ -14,7 +14,7 @@ var handlebarHelpers = {
         }
     }  
 };
-
+app.use("/public", express.static(__dirname + '/public'));
 app.engine('handlebars', exphbs({
     defaultLayout: 'main',
     helpers: handlebarHelpers
@@ -49,17 +49,24 @@ if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
     //ethereumSpyDb.clearDatabase();
 }
 
-app.get('/', function(req, res) {
-    ethereumSpyDb.getPriceMovementPredictions((predictionModels) => {
+app.get('/', function(req, res){
+   ethereumSpyDb.getPredictionsGroupedByCoinsThenByModels((predictionsGroupedByCoinsThenByModels) => {
+        res.render('home', { predictionsGroupedByCoinsThenByModels: predictionsGroupedByCoinsThenByModels });
+    });
+});
+
+app.get('/console', function(req, res) {
+    ethereumSpyDb.getPredictionsGroupedByModels((predictionModels) => {
         predictionModels.forEach((predictionModel) => {
             var correctPredictions = predictionModel.predictions.filter((prediction) => {
                 return prediction.previousPredictionCorrect;
             });
             
+            predictionModel.predictionVetted = predictionModel.predictionWasCorrect !== null;
             predictionModel.predictionAccuracy = Math.round(correctPredictions.length / predictionModel.predictions.length * 100);
         });
         
-        res.render('home', { models: predictionModels });
+        res.render('console', { models: predictionModels });
     });
 });
 

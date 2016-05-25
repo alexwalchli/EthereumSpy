@@ -1,0 +1,52 @@
+
+<div class="row">
+    <div class="columns large-12">
+        <h1>Ethereum Spy</h1>
+    </div>
+</div>
+<div class="row">
+    {{#each models}}
+    <div class="columns small-6 columns">
+        <h4>{{this._id}}</h4>
+        <strong>Prediction Accuracy: {{this.predictionAccuracy}}%
+        <table>
+            <thead>
+                <tr>
+                    <th>Results</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each this.predictions}}
+                <tr>
+                    <td>
+                        <strong>Prediction: {{this.prediction}} movement</strong><br>
+                        <strong><small>
+                            {{#if this.predictionVetted}}
+                                {{#if this.predictionWasCorrect}}
+                                <span style="background-color:#3FFF7F">Last Prediction Correct</span>
+                                {{else}}
+                                <span style="background-color:#FF3F3F">Last Prediction Incorrect</span>
+                                {{/if}}
+                            {{else}}
+                                <i>Prediction not vetted</i>
+                            {{/if}}
+                        </small></strong>
+                        <br>
+                        <small>Price Change: {{this.priceChange}}</small>
+                        <br>
+                        <small>Sentiment Score: {{this.sentimentScore}} ({{this.averageTweetSentiment}} avg)</small>
+                        <br>
+                        <small>
+                            # of Tweets: {{this.numberOfTweets}}<br>
+                            Most Critical: <small style="font-size:.5em">{{this.mostCriticalTweet}}</small><br>
+                            Most Positive: <small style="font-size:.5em">{{this.mostPositiveTweet}}</small>
+                        </small>
+                    </td>    
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        
+    </div>
+    {{/each}}  
+</div>

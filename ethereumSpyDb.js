@@ -27,9 +27,11 @@ class EthereumSpyDb{
         this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
-    updatePriceMovementPredictionModel(modelName, textClassifierJson, callback){
+    upsertPriceMovementPredictionModel(coinTicker, modelName, modelLabel, textClassifierJson, callback){
         var priceMovementPredictionModel = {
+            coinTicker: coinTicker,
             modelName: modelName,
+            modelLabel: modelLabel,
             textClassifierJson: textClassifierJson  
         };
         this.db.priceMovementPredictionModels.findOne({ modelName: modelName }, (error, model) => {
@@ -44,10 +46,46 @@ class EthereumSpyDb{
         this.db.priceMovementPredictions.insert(prediction);
     }
     
-    getPriceMovementPredictions(callback){
+    getPredictionsGroupedByModels(callback){
         this.db.priceMovementPredictions.aggregate([
             { $group : { _id : "$modelName", predictions: { $push: "$$ROOT" } } }
         ], (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+    }
+    
+    getPredictionsGroupedByCoinsThenByModels(callback){
+        this.db.priceMovementPredictions.aggregate([
+            { 
+                $group: { 
+                    _id: { coinTicker: "$coinTicker", modelName: "$modelName", modelLabel: "$modelLabel" },
+                    predictionCount: { $sum: 1 },
+                    correctPredictionCount: {$sum: {$cond: [{$eq: ['$predictionWasCorrect', true]}, 1, 0]}},
+                    currentPrediction: { $last: "$predictionForNextInterval" },
+                    currentPredictionPredictedOn : { $last: "$timestamp"}
+                } 
+            }, 
+            { 
+                $group : { 
+                    _id :  "$_id.coinTicker",
+                    models: {
+                        $push: { 
+                            modelName: "$_id.modelName",
+                            modelLabel: "$_id.modelLabel",
+                            predictionCount: "$predictionCount",
+                            correctPredictionCount: "$correctPredictionCount",
+                            predictionAccuracy: { $divide: ["$correctPredictionCount", "$predictionCount"] },
+                            currentPrediction: "$currentPrediction",
+                            currentPredictionPredictedOn: "$currentPredictionPredictedOn"
+                        }
+                    }
+                }
+            } 
+        ], (error, resp) => {
+            this._handleDatabaseResponse(error, resp, callback); 
+        });
+    }
+    
+    updatePriceMovementPrediction(prediction){
+        this.db.priceMovementPredictions.save(prediction, (error, resp) => { this._handleDatabaseResponse(error, resp); });
     }
     
     cacheAnalyzedTweets(analyzedTweets, callback){

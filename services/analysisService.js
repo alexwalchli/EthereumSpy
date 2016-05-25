@@ -7,7 +7,7 @@ class AnalysisService{
         this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
     }
     
-    classifyTweetsAgainstPriceMovement(modelName, coinTicker, prices, tweets){
+    classifyTweetsAgainstPriceMovement(modelName, modelLabel, coinTicker, prices, tweets){
         console.log('Running ' + modelName + ' for ' + coinTicker + ' price prediction');
         if(!tweets || tweets.length === 0 || !prices || prices.length === 0){
             console.log('Skipping analysis, no Tweets or Prices');
@@ -38,23 +38,24 @@ class AnalysisService{
                 }, 0);
                 var averageTweetSentiment = overallSentimentScore / tweets.length;
                 
-                var previousPredictionCorrect = null;
                 if(lastPriceMovementPrediction){
-                    previousPredictionCorrect = lastPriceMovementPrediction.prediction == priceMovement;   
+                    lastPriceMovementPrediction.predictionWasCorrect = lastPriceMovementPrediction.prediction == priceMovement; 
+                    self.ethereumSpyDb.updatePriceMovementPrediction(lastPriceMovementPrediction);  
                 }
                 
                 textClassifier.learn(tweetCorpus, priceMovement);
-                self.ethereumSpyDb.updatePriceMovementPredictionModel(modelName, textClassifier.toJson(), () => {
+                self.ethereumSpyDb.upsertPriceMovementPredictionModel(coinTicker, modelName, modelLabel, textClassifier.toJson(), () => {
                     console.log('Price movement prediction model updated');
                 });
                 
-                var currentPrediction = textClassifier.categorize(tweetCorpus);
+                var predictionForNextInterval = textClassifier.categorize(tweetCorpus);
                 self.ethereumSpyDb.addPriceMovementPrediction({ 
                     modelName: modelName,
+                    modelLabel: modelLabel,
                     coinTicker: coinTicker,
                     timestamp: Date.now(),
-                    previousPredictionCorrect: previousPredictionCorrect,
-                    prediction: currentPrediction,
+                    predictionWasCorrect: null, // updated at next interval
+                    predictionForNextInterval: predictionForNextInterval,
                     numberOfTweets: tweets.length,
                     priceMovement: priceMovement,
                     priceChange: priceChange,
