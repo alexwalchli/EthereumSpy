@@ -133,7 +133,7 @@ class EthereumSpyDb{
     
     clearPriceCache(coinTicker){
         console.log('Clearing ' + coinTicker  + ' Price Cache');
-        this.db.remove({ coinTicker: coinTicker }, false);
+        this.db.priceCache.drop();
     }
     
     clearDatabase(){
