@@ -28,22 +28,28 @@ class DataCollectionService{
         this.coinsTrackingInfo.forEach((coin) => {
             if(process.env.NODE_ENV == 'development'){
                 nodeSchedule.scheduleJob('1 * * * * *', () => { 
-                    this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-debugging', '6 hour prediction', 1); 
+                    this._classifyDataAgainstPriceMovement(coin.ticker, 'tweet-classification-' + coin.ticker + '-debugging', '1 min debug prediction', 1); 
                 });
             }
+            
+            // hourly
+            nodeSchedule.scheduleJob('0 1 * * *', () => { 
+                this._classifyDataAgainstPriceMovement(coin.ticker,'tweet-classification-' + coin.ticker + '-every-hour', 'Hourly prediction', 6); 
+            });
+            
             // every 6 hours
             nodeSchedule.scheduleJob('0 0,6,12,18 * * *', () => { 
-                this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-6hrs', '6 hour prediction', 6); 
+                this._classifyDataAgainstPriceMovement(coin.ticker,'tweet-classification-' + coin.ticker + '-every-6hrs', '6 hour prediction', 6); 
             });
             
             // every 12 hours
             nodeSchedule.scheduleJob('0 10,22 * * *', () => { 
-                this._classifyDataAgainstPriceMovement(coin.ticker, 'tweets-' + coin.ticker + '-every-12hrs', '12 hour prediction', 12);
+                this._classifyDataAgainstPriceMovement(coin.ticker, 'tweet-classification-' + coin.ticker + '-every-12hrs', '12 hour prediction', 12);
             });
             
             // every day
             nodeSchedule.scheduleJob('0 13 * * *', () => { 
-                this._classifyDataAgainstPriceMovement(coin.ticker,'tweets-' + coin.ticker + '-every-24hrs', 'Daily prediction', 24); 
+                this._classifyDataAgainstPriceMovement(coin.ticker,'tweet-classification-' + coin.ticker + '-every-24hrs', 'Daily prediction', 24); 
             }); 
         });
         

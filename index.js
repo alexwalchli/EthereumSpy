@@ -29,20 +29,13 @@ var twitterConnectionInfo = {
     access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 };
-
 var coinsTrackingInfo = [
-    {
-        ticker: 'BTC',
-        phrase: 'bitcoin' 
-    },
-    {
-        ticker: 'ETH',
-        phrase: 'ethereum' 
-    },
+    { ticker: 'BTC', phrase: 'bitcoin' },
+    { ticker: 'ETH', phrase: 'ethereum' },
 ];
 
-var bitcoinDataCollectionService = new DataCollectionService(coinsTrackingInfo, process.env.ETHEREUM_SPY_DATABASE_CONN, twitterConnectionInfo);
-bitcoinDataCollectionService.scheduleDataCollection();
+var dataCollectionService = new DataCollectionService(coinsTrackingInfo, process.env.ETHEREUM_SPY_DATABASE_CONN, twitterConnectionInfo);
+dataCollectionService.scheduleDataCollection();
 var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
 if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
