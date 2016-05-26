@@ -1,6 +1,6 @@
 <div class="row">
     <div class="columns large-12">
-        <h4>{{modelName}}</h4>
+        <h4><a href="/">Home</a> &gt {{modelName}} prediction history</h4>
         <strong>Prediction Accuracy: {{this.predictionAccuracy}}%
         <table>
             <thead>
@@ -12,12 +12,21 @@
                 {{#each this.predictions}}
                 <tr>
                     <td>
+                        {{#equal this.status 'waiting_for_result'}}
+                        <p><strong>Current Prediction: {{this.prediction}} movement</strong></p>
+                        <p>
+                            <small>
+                                <span class="smartdate" data-timestamp="{{this.unixTimestamp}}"></span>
+                            </small>
+                        </p>
+                        {{/equal}}
+                        {{#equal this.status 'complete'}}
+                        <strong>
                         {{#if this.predictionWasCorrect}}
-                        <span style="color:#3FFF7F">Correctly </span>
+                        <span style="color:#00BD4C">Correctly predicted {{this.prediction}} price movement</span>
                         {{else}}
-                        <span style="color:#FF3F3F">Incorrectly </span>
+                        <span style="color:#FF3F3F">Incorrectly predicted {{this.prediction}} price movement</span>
                         {{/if}}
-                        predicted {{this.predictionForNextInterval}} price movement
                         </strong>
                         <br>
                         <small>
@@ -33,6 +42,7 @@
                             Most Critical: <small style="font-size:.5em">{{this.mostCriticalTweet}}</small><br>
                             Most Positive: <small style="font-size:.5em">{{this.mostPositiveTweet}}</small>
                         </small>
+                        {{/equal}}
                     </td>    
                 </tr>
                 {{/each}}

@@ -47,7 +47,8 @@ class EthereumSpyDb{
     }
     
     getPredictionsByModel(modelName, callback){
-        this.db.priceMovementPredictions.find({ modelName: modelName }, (error, resp) => this._handleDatabaseResponse(error, resp, callback));
+        this.db.priceMovementPredictions.find({ modelName: modelName })
+                                        .sort({ timestamp: -1 }, (error, resp) => this._handleDatabaseResponse(error, resp, callback));
     }
     
     getPredictionsGroupedByModels(callback){
@@ -63,7 +64,7 @@ class EthereumSpyDb{
                     _id: { coinTicker: "$coinTicker", modelName: "$modelName", modelLabel: "$modelLabel" },
                     predictionCount: { $sum: 1 },
                     correctPredictionCount: {$sum: {$cond: [{$eq: ['$predictionWasCorrect', true]}, 1, 0]}},
-                    currentPrediction: { $last: "$predictionForNextInterval" },
+                    currentPrediction: { $last: "$prediction" },
                     currentPredictionPredictedOn : { $last: "$unixTimestamp"}
                 } 
             }, 
@@ -76,7 +77,7 @@ class EthereumSpyDb{
                             modelLabel: "$_id.modelLabel",
                             predictionCount: "$predictionCount",
                             correctPredictionCount: "$correctPredictionCount",
-                            predictionAccuracy: { $divide: ["$correctPredictionCount", "$predictionCount"] },
+                            predictionAccuracy: { $multiply: [100, { $divide: ["$correctPredictionCount", "$predictionCount"] }]},
                             currentPrediction: "$currentPrediction",
                             currentPredictionPredictedOn: "$currentPredictionPredictedOn"
                         }

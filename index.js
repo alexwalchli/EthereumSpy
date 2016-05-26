@@ -39,7 +39,7 @@ dataCollectionService.scheduleDataCollection();
 var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
 if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
-    ethereumSpyDb.clearDatabase();
+    //ethereumSpyDb.clearDatabase();
 }
 
 app.get('/', function(req, res){
