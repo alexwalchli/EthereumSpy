@@ -108,11 +108,11 @@ class EthereumSpyDb{
     }
     
     getAnalyzedTweetsFromCacheFromLastNHours(coinTicker, hours, callback){
-        var ms = 60 * hours * 1000;
+        var ms = 1000*3600*hours;
         var nHoursAgo = Date.now() - ms;
         this.db.analyzedTweetCache.find(
             { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
-        }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
+        }).sort({ timestamp: 1}, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }
     
     clearAnalyzedTweetCache(){
@@ -121,11 +121,11 @@ class EthereumSpyDb{
     }
     
     getPricesFromCacheFromLastNHours(coinTicker, hours, callback){
-        var ms = 60 * hours * 1000;
+        var ms = 1000*3600*hours;
         var nHoursAgo = Date.now() - ms;
         this.db.priceCache.find(
             { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
-        }, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
+        }).sort({ timestamp: 1}, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
     }
     
     cachePrice(price){
