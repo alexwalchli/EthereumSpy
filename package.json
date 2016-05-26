@@ -2,9 +2,9 @@
   "name": "ethereumspy",
   "version": "1.0.0",
   "description": "Cryptocurrency price movement prediction",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node --harmony --use_strict index.js"
+    "start": "node --harmony --use_strict app.js"
   },
   "author": "",
   "license": "ISC",
