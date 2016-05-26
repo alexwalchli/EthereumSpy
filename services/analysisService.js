@@ -39,7 +39,15 @@ class AnalysisService{
                 var averageTweetSentiment = overallSentimentScore / tweets.length;
                 
                 if(lastPriceMovementPrediction){
-                    lastPriceMovementPrediction.predictionWasCorrect = lastPriceMovementPrediction.prediction == priceMovement; 
+                    lastPriceMovementPrediction.predictionWasCorrect = lastPriceMovementPrediction.prediction == priceMovement;
+                    lastPriceMovementPrediction.numberOfTweets = tweets.length;
+                    lastPriceMovementPrediction.priceMovement = priceMovement;
+                    lastPriceMovementPrediction.priceChange = priceChange;
+                    lastPriceMovementPrediction.sentimentScore = overallSentimentScore;
+                    lastPriceMovementPrediction.averageTweetSentiment = averageTweetSentiment;
+                    lastPriceMovementPrediction.mostCriticalTweet = mostCriticalTweet.text;
+                    lastPriceMovementPrediction.mostPositiveTweet = mostPositiveTweet.text;
+                    lastPriceMovementPrediction.status = 'complete';
                     self.ethereumSpyDb.updatePriceMovementPrediction(lastPriceMovementPrediction);  
                 }
                 
@@ -48,22 +56,15 @@ class AnalysisService{
                     console.log('Price movement prediction model updated');
                 });
                 
-                var predictionForNextInterval = textClassifier.categorize(tweetCorpus);
+                var prediction = textClassifier.categorize(tweetCorpus);
                 self.ethereumSpyDb.addPriceMovementPrediction({ 
                     modelName: modelName,
                     modelLabel: modelLabel,
                     coinTicker: coinTicker,
                     timestamp: Date.now(),
                     unixTimestamp: Math.floor(Date.now() / 1000),
-                    predictionWasCorrect: null, // updated at next interval
-                    predictionForNextInterval: predictionForNextInterval,
-                    numberOfTweets: tweets.length,
-                    priceMovement: priceMovement,
-                    priceChange: priceChange,
-                    sentimentScore: overallSentimentScore,
-                    averageTweetSentiment: averageTweetSentiment,
-                    mostCriticalTweet: mostCriticalTweet.text,
-                    mostPositiveTweet: mostPositiveTweet.text
+                    prediction: prediction,
+                    status: 'waiting_for_result'
                 }); 
             });
         });   
