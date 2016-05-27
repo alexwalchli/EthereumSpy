@@ -33,7 +33,7 @@ class DataCollectionService{
             }
             
             // hourly
-            nodeSchedule.scheduleJob('0 1 * * *', () => { 
+            nodeSchedule.scheduleJob('0 * * * *', () => { 
                 this._classifyDataAgainstPriceMovement(coin.ticker,'tweet-classification-' + coin.ticker + '-every-hour', 'Hourly prediction', 1); 
             });
             
