@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var DataCollectionService = require('./services/dataCollectionService');
-var EthereumSpyDb = require('./ethereumSpyDb');
-var express = require('express');
-var exphbs  = require('express-handlebars');
-var handlebarHelpers = {
+const _ = require('lodash');
+const DataCollectionService = require('./services/dataCollectionService');
+const EthereumSpyDb = require('./ethereumSpyDb');
+const express = require('express');
+const exphbs  = require('express-handlebars');
+const handlebarHelpers = {
     equal: function(lvalue, rvalue, options) {
         if (arguments.length < 3)
             throw new Error("Handlebars Helper equal needs 2 parameters");
@@ -15,16 +15,16 @@ var handlebarHelpers = {
     }  
 };
 
-var twitterConnectionInfo = {
+const twitterConnectionInfo = {
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
     access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 };
-var coinsTrackingInfo = [ { ticker: 'BTC', phrase: 'bitcoin' }, { ticker: 'ETH', phrase: 'ethereum' } ];
-var dataCollectionService = new DataCollectionService(coinsTrackingInfo, process.env.ETHEREUM_SPY_DATABASE_CONN, twitterConnectionInfo);
+const coinsTrackingInfo = [ { ticker: 'BTC', phrase: 'bitcoin' }, { ticker: 'ETH', phrase: 'ethereum' } ];
+const ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
+const dataCollectionService = new DataCollectionService(coinsTrackingInfo, twitterConnectionInfo, ethereumSpyDb);
 dataCollectionService.scheduleDataCollection();
-var ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 
 var app = express();
 app.use((req, res, next) => {

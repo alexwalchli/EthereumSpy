@@ -1,10 +1,10 @@
-var _ = require('lodash');
-var bayes = require('bayes');
-var EthereumSpyDb = require('../ethereumSpyDb');
+const _ = require('lodash');
+const bayes = require('bayes');
+const EthereumSpyDb = require('../ethereumSpyDb');
 
 class AnalysisService{
-    constructor(databaseConnectionString){
-        this.ethereumSpyDb = new EthereumSpyDb(databaseConnectionString);
+    constructor(ethereumSpyDb){
+        this.ethereumSpyDb = ethereumSpyDb;
     }
     
     classifyTweetsAgainstPriceMovement(modelName, modelLabel, coinTicker, prices, tweets){
