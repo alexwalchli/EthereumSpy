@@ -1,0 +1,4 @@
+
+class PredictionModelRepository extends DataRepository{
+    
+}

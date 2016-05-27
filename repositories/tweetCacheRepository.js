@@ -1,0 +1,4 @@
+
+class TweetCacheRepository extends DataRepository{
+    
+}

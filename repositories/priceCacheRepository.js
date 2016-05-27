@@ -1,0 +1,4 @@
+
+class PriceCacheRepository extends DataRepository{
+    
+}
