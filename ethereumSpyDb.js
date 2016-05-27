@@ -1,5 +1,5 @@
-var mongojs = require('mongojs');
-var _ = require('lodash');
+const mongojs = require('mongojs');
+const _ = require('lodash');
 
 class EthereumSpyDb{
     constructor(connectionString){
@@ -10,17 +10,19 @@ class EthereumSpyDb{
              'analyzedTweetCache',
              'priceCache']);
         this.db.on('error', function (err) {
-            console.log('database error', err);
+            console.log('Database error', err);
         });
 
         this.db.on('connect', function () {
-            console.log('database connected');
+            console.log('Database connected');
         });
     }
     
     getLastPriceMovementPrediction(callback){
-        this.db.priceMovementPredictions.findOne({$query: {}, $orderby: {$natural : -1}},
-            (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
+        this.db.priceMovementPredictions.find().sort({ timestamp: -1 }).limit(1,
+            (error, resp) => { 
+                this._handleDatabaseResponse(error, resp, callback); 
+            });
     }
     
     getPriceMovementPredictionModel(modelName, callback){

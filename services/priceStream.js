@@ -1,4 +1,5 @@
 const request = require('request');
+const nodeSchedule = require('node-schedule');
 
 class PriceStream{
     
@@ -40,4 +41,4 @@ class PriceStream{
     }
 }
 
-module.exports = PriceService;
+module.exports = PriceStream;

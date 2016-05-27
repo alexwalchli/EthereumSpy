@@ -1,12 +1,12 @@
 const _ = require('lodash');
-const PriceService = require('./priceService');
+const PriceStream = require('./priceStream');
 const AnalysisService = require('./analysisService');
 const nodeSchedule = require('node-schedule');
 const TwitterStream = require('./twitterStream');
 
 class DataCollectionService{
     constructor(coinsTrackingInfo, twitterConnectionInfo, ethereumSpyDb){
-        this.priceService = new PriceService(coinsTrackingInfo, ethereumSpyDb);
+        this.priceStream = new PriceStream(coinsTrackingInfo, ethereumSpyDb);
         this.analysisService = new AnalysisService(ethereumSpyDb);
         this.ethereumSpyDb = ethereumSpyDb;
         this.twitterConnectionInfo = twitterConnectionInfo;
