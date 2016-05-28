@@ -3,21 +3,20 @@ const PriceStream = require('./priceStream');
 const AnalysisService = require('./analysisService');
 const nodeSchedule = require('node-schedule');
 const TwitterStream = require('./twitterStream');
+const CoinsTrackingInfo = require('../coinsTrackingInfo');
 
 class DataCollectionService{
-    constructor(coinsTrackingInfo, twitterConnectionInfo, ethereumSpyDb){
-        this.priceStream = new PriceStream(coinsTrackingInfo, ethereumSpyDb);
+    constructor(ethereumSpyDb){
+        this.priceStream = new PriceStream(ethereumSpyDb);
         this.analysisService = new AnalysisService(ethereumSpyDb);
         this.ethereumSpyDb = ethereumSpyDb;
-        this.twitterConnectionInfo = twitterConnectionInfo;
-        this.coinsTrackingInfo = coinsTrackingInfo;
-        this.twitterStream = new TwitterStream(twitterConnectionInfo, coinsTrackingInfo, ethereumSpyDb);
+        this.twitterStream = new TwitterStream(ethereumSpyDb);
         
         console.log('Data Collection initialized');
     }
     
     scheduleDataCollection(){
-        this.coinsTrackingInfo.forEach((coin) => {
+        CoinsTrackingInfo.forEach((coin) => {
             if(process.env.NODE_ENV == 'development'){
                 nodeSchedule.scheduleJob('1 * * * * *', () => { 
                     this._classifyDataAgainstPriceMovement(coin.ticker, 'tweet-classification-' + coin.ticker + '-debugging', '1 min debug prediction', 1); 

@@ -19,9 +19,9 @@ class EthereumSpyDb{
     }
     
     getLastPriceMovementPrediction(callback){
-        this.db.priceMovementPredictions.find().sort({ timestamp: -1 }).limit(1,
-            (error, resp) => { 
-                this._handleDatabaseResponse(error, resp, callback); 
+        this.db.priceMovementPredictions.find({}).sort({ timestamp: -1 }).limit(1,
+            (error, resp) => {
+                this._handleDatabaseResponse(error, resp[0] || null, callback); 
             });
     }
     
@@ -79,7 +79,12 @@ class EthereumSpyDb{
                             modelLabel: "$_id.modelLabel",
                             predictionCount: "$predictionCount",
                             correctPredictionCount: "$correctPredictionCount",
-                            predictionAccuracy: { $multiply: [100, { $divide: ["$correctPredictionCount", "$predictionCount"] }]},
+                            predictionAccuracy: { 
+                                $multiply: [100, 
+                                    // substract one for the current prediction with no result
+                                    { $divide: ["$correctPredictionCount", { $subtract: ["$predictionCount", 1]} ]}
+                                ]
+                            },
                             currentPrediction: "$currentPrediction",
                             currentPredictionPredictedOn: "$currentPredictionPredictedOn"
                         }
@@ -102,7 +107,7 @@ class EthereumSpyDb{
     }
     
     cacheAnalyzedTweet(analyzedTweet, callback){
-        this.db.analyzedTweetCache.insert(analyzedTweet);
+        this.db.analyzedTweetCache.insert(analyzedTweet, (error, resp) => { this._handleDatabaseResponse(error, resp, callback); });
     }
     
     getAnalyzedTweetsFromCache(callback){

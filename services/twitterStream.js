@@ -1,12 +1,12 @@
 const Twitter = require('twitter');
 const EventEmitter = require('events');
 const SentimentService = require('./sentimentService');
+const TwitterConnectionInfo = require('../twitterConnectionInfo');
+const CoinsTrackingInfo = require('../coinsTrackingInfo');
 
 class TwitterStream{
     
-    constructor(twitterConnectionInfo, coinsTrackingInfo, ethereumSpyDb){
-        this.twitterConnectionInfo = twitterConnectionInfo;
-        this.coinsTrackingInfo = coinsTrackingInfo;
+    constructor(ethereumSpyDb){
         this.ethereumSpyDb = ethereumSpyDb;
         this.sentimentService = new SentimentService();
         this.twitterClient;
@@ -16,9 +16,9 @@ class TwitterStream{
     
     start(){
         console.log('Initializing Twitter connection...');
-        this.twitterClient = new Twitter(this.twitterConnectionInfo);
+        this.twitterClient = new Twitter(TwitterConnectionInfo);
         var terms = [];
-        this.coinsTrackingInfo.map((coin) => { terms.push(coin.phrase); });
+        CoinsTrackingInfo.map((coin) => { terms.push(coin.phrase); });
         var phrase = terms.join(',');
         var self = this;
         this._resetTwitterTimeout();
@@ -34,7 +34,7 @@ class TwitterStream{
         this._resetTwitterTimeout();
         var sentiment = this.sentimentService.getSentiment(tweet.text);
         
-        this.coinsTrackingInfo.forEach((coin) => {
+        CoinsTrackingInfo.forEach((coin) => {
            if(tweet.text.toLowerCase().indexOf(coin.phrase.toLowerCase()) > -1){
                 var analyzedTweet = {
                     coinTicker: coin.ticker,
@@ -43,7 +43,6 @@ class TwitterStream{
                     sentimentScore: sentiment
                 }; 
                 this._cacheAnalyzedTweet(analyzedTweet);
-                console.log('Handled new "' + coin.ticker + '" Tweet.');
            }
         });
     }

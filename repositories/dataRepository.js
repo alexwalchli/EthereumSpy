@@ -17,4 +17,14 @@ class DataRepository {
             console.log('Database connected');
         });
     }
+    
+    handleDatabaseResponse(error, resp, callback){
+        if(error){
+            console.log('Error querying database: ' + error);
+        } else if(callback) {
+            return callback(resp);
+        }
+    }
 }
+
+module.exports = DataRepository;

@@ -1,20 +1,21 @@
 const request = require('request');
 const nodeSchedule = require('node-schedule');
+const PriceCacheRepository = require('../repositories/priceCacheRepository');
+const CoinsTrackingInfo = require('../coinsTrackingInfo');
 
-class PriceStream{
+class PriceStream {
     
-    constructor(coinsTrackingInfo, ethereumSpyDb){
-        this.coinsTrackingInfo = coinsTrackingInfo;
+    constructor(ethereumSpyDb){
         this.ethereumSpyDb = ethereumSpyDb;
+        //this.priceCacheRepository = new PriceCacheRepository();
     }
     
     schedule(schedule){
-        // every 45 seconds
         nodeSchedule.scheduleJob(schedule, () => { this._retrieveAllCoinPrices(); });
     }
     
     _retrieveAllCoinPrices(){
-        this.coinsTrackingInfo.forEach((coin) => {
+        CoinsTrackingInfo.forEach((coin) => {
             console.log('Retrieving price for ' + coin.ticker);
             this._getAndCacheCoinPrice(coin.ticker); 
         });
