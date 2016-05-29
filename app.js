@@ -3,7 +3,7 @@ const DataCollectionService = require('./services/dataCollectionService');
 const EthereumSpyDb = require('./ethereumSpyDb');
 const express = require('express');
 const exphbs  = require('express-handlebars');
-const handlebarsHelpers = require('handlebarsHelpers');
+const handlebarsHelpers = require('./handlebarsHelpers');
 
 const ethereumSpyDb = new EthereumSpyDb(process.env.ETHEREUM_SPY_DATABASE_CONN);
 const dataCollectionService = new DataCollectionService(ethereumSpyDb);
@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 });
 app.use("/public", express.static(__dirname + '/public'));
 app.use('/', require('./controllers/index'));
-app.engine('handlebars', exphbs({ defaultLayout: 'main', helpers: handlebarHelpers }));
+app.engine('handlebars', exphbs({ defaultLayout: 'main', helpers: handlebarsHelpers }));
 app.set('view engine', 'handlebars');
 
 if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
