@@ -48,7 +48,6 @@ class DataCollectionService{
         nodeSchedule.scheduleJob('0 23 * * *', () => { this._clearDataCache(); });
         
         this.twitterStream.start();
-        this.priceStream.schedule('45 * * * * *');
         
         console.log('Data Collection scheduled');
     }

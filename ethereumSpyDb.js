@@ -18,8 +18,8 @@ class EthereumSpyDb{
         });
     }
     
-    getLastPriceMovementPrediction(callback){
-        this.db.priceMovementPredictions.find({}).sort({ timestamp: -1 }).limit(1,
+    getLastPriceMovementPrediction(coinTicker, callback){
+        this.db.priceMovementPredictions.find({ coinTicker: coinTicker }).sort({ timestamp: -1 }).limit(1,
             (error, resp) => {
                 this._handleDatabaseResponse(error, resp[0] || null, callback); 
             });
@@ -132,7 +132,9 @@ class EthereumSpyDb{
         var nHoursAgo = Date.now() - ms;
         this.db.priceCache.find(
             { $and: [ { coinTicker: coinTicker }, { timestamp: {$gt:nHoursAgo}} ] 
-        }).sort({ timestamp: 1}, (error, resp) => { this._handleDatabaseResponse(error, resp, callback);});
+        }).sort({ timestamp: 1}, (error, resp) => { 
+            this._handleDatabaseResponse(error, resp, callback);
+        });
     }
     
     cachePrice(price){

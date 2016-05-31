@@ -43,6 +43,7 @@ class TwitterStream{
                     sentimentScore: sentiment
                 }; 
                 this._cacheAnalyzedTweet(analyzedTweet);
+                console.log('Handled new ' + coin.ticker + ' tweet');
            }
         });
     }
