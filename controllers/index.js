@@ -11,11 +11,14 @@ router.get('/history/:modelName', function(req, res){
     var modelName = req.param('modelName');
     req.ethereumSpyDb.getPredictionsByModel(modelName, (predictions) => {
         var correctPredictions = predictions.filter((prediction) => {
-            return prediction.predictionWasCorrect;
+            return prediction.predictionWasCorrect && prediction.status === 'complete';
         });
+        var totalPredictions = predictions.filter((prediction) => {
+            return prediction.status === 'complete';
+        });
+        var predictionAccuracy = Math.round((correctPredictions.length / totalPredictions.length) * 100);
         
-        var predictionAccuracy = Math.round(correctPredictions.length / predictions.length * 100);
-        res.render('history', { modelName: modelName, predictions: predictions, predictionAccuracy: predictionAccuracy }); 
+        res.render('history', { modelName: modelName, predictions: predictions, predictionAccuracy: predictionAccuracy}); 
     });
 });
 

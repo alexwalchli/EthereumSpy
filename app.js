@@ -21,7 +21,7 @@ app.engine('handlebars', exphbs({ defaultLayout: 'main', helpers: handlebarsHelp
 app.set('view engine', 'handlebars');
 
 if(process.env.NODE_ENV == 'development' && process.env.CLEAR_DB_ON_START){
-    ethereumSpyDb.clearDatabase();
+    //ethereumSpyDb.clearDatabase();
 }
 
 app.listen(process.env.PORT || 3000, function(){

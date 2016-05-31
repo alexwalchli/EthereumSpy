@@ -50,7 +50,9 @@ class EthereumSpyDb{
     
     getPredictionsByModel(modelName, callback){
         this.db.priceMovementPredictions.find({ modelName: modelName })
-                                        .sort({ timestamp: -1 }, (error, resp) => this._handleDatabaseResponse(error, resp, callback));
+                                        .sort({ timestamp: -1 }, (error, predictions) => {
+                                            this._handleDatabaseResponse(error, predictions, callback); 
+                                        });
     }
     
     getPredictionsGroupedByModels(callback){
@@ -64,8 +66,14 @@ class EthereumSpyDb{
             { 
                 $group: { 
                     _id: { coinTicker: "$coinTicker", modelName: "$modelName", modelLabel: "$modelLabel" },
-                    predictionCount: { $sum: 1 },
-                    correctPredictionCount: {$sum: {$cond: [{$eq: ['$predictionWasCorrect', true]}, 1, 0]}},
+                    predictionCount: { $sum: { $cond: [{ $eq: ['$status', 'complete']}, 1, 0 ]} },
+                    correctPredictionCount: { $sum: 
+                        { $cond: [
+                            { $and: [
+                               { $eq: ['$predictionWasCorrect', true] },
+                               { $eq: ['$status', 'complete']}
+                            ]}, 1, 0]}
+                    },
                     currentPrediction: { $last: "$prediction" },
                     currentPredictionPredictedOn : { $last: "$unixTimestamp"}
                 } 
@@ -79,11 +87,10 @@ class EthereumSpyDb{
                             modelLabel: "$_id.modelLabel",
                             predictionCount: "$predictionCount",
                             correctPredictionCount: "$correctPredictionCount",
-                            predictionAccuracy: { 
-                                $multiply: [100, 
-                                    // substract one for the current prediction with no result
-                                    { $divide: ["$correctPredictionCount", { $subtract: ["$predictionCount", 1]} ]}
-                                ]
+                            predictionAccuracy:{ $cond: 
+                                  [ { $eq: [ "$predictionCount", 0 ] }, "N/A",
+                                    { $multiply: [100, { $divide: ["$correctPredictionCount", "$predictionCount"]}] }
+                                  ]   
                             },
                             currentPrediction: "$currentPrediction",
                             currentPredictionPredictedOn: "$currentPredictionPredictedOn"
