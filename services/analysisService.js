@@ -19,7 +19,7 @@ class AnalysisService{
         var self = this;
         this.priceService.getPrice(coinTicker, (currentPrice) => {
             self.ethereumSpyDb.getPriceMovementPredictionModel(modelName, (predictionModel) => {
-                self.ethereumSpyDb.getLastPriceMovementPrediction(coinTicker, (lastPrediction) => {
+                self.ethereumSpyDb.getLastPriceMovementPrediction(modelName, (lastPrediction) => {
                     if(!lastPrediction){
                         // bootstrap predictions and a starting price
                         self.ethereumSpyDb.addPriceMovementPrediction({

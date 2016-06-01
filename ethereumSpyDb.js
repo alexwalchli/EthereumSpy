@@ -18,8 +18,8 @@ class EthereumSpyDb{
         });
     }
     
-    getLastPriceMovementPrediction(coinTicker, callback){
-        this.db.priceMovementPredictions.find({ coinTicker: coinTicker }).sort({ timestamp: -1 }).limit(1,
+    getLastPriceMovementPrediction(modelName, callback){
+        this.db.priceMovementPredictions.find({ modelName: modelName }).sort({ timestamp: -1 }).limit(1,
             (error, resp) => {
                 this._handleDatabaseResponse(error, resp[0] || null, callback); 
             });
