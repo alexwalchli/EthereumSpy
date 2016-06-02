@@ -66,7 +66,11 @@ class EthereumSpyDb{
             { 
                 $group: { 
                     _id: { coinTicker: "$coinTicker", modelName: "$modelName", modelLabel: "$modelLabel" },
-                    predictionCount: { $sum: { $cond: [{ $eq: ['$status', 'complete']}, 1, 0 ]} },
+                    predictionCount: { $sum: { $cond: [
+                        { $and: [
+                            { $eq: ['$status', 'complete']}, { "$ifNull": ["$prediction", false] }]
+                        }, 1, 0 ]
+                    }},
                     correctPredictionCount: { $sum: 
                         { $cond: [
                             { $and: [
